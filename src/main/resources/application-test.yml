@@ -1,0 +1,44 @@
+server:
+  port: 8888
+
+# mail
+# https://victorydntmd.tistory.com/342
+
+# redis
+# https://sabarada.tistory.com/105
+
+aes:
+  key: devh
+
+auth:
+  key:
+    size: 16
+
+
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/dev/tools/h2/db/auth
+    driver-class-name: org.h2.Driver
+    username: sa
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+  redis:
+    host: localhost
+    port: 6379
+  mail:
+    host: ${mail.host}
+    port: ${mail.port}
+    username: ${mail.username}
+    password: ${mail.password}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: ${mail.smtp.starttls.enable}
+            required: ${mail.smtp.starttls.required}
+          auth: ${mail.smtp.auth}
+          connectiontimeout: ${mail.smtp.connectiontimeout}
+          timeout: ${mail.smtp.timeout}
+          writetimeout: ${mail.smtp.writetimeout}
