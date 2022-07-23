@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+</head>
+<script th:src="@{/scripts/axios.min.js}"></script>
+<script th:src="@{/scripts/cryptojs.min.js}"></script>
+<script th:src="@{/scripts/cryptojs_converter.js}"></script>
+<script type="text/javascript">
+const key = "[[${aesKey}]]";
+document.addEventListener("DOMContentLoaded", (evt) => {
+
+  const encrypt = (str, type) => {
+    const salt = CryptoJS.lib.WordArray.random(128 / 8);
+    const iv = CryptoJS.lib.WordArray.random(128 / 8);
+    const key256Bits = CryptoJS.PBKDF2(key, salt, {
+      keySize: 256 / 32,
+      iterations: 1000
+    });
+    const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse("test"), key256Bits, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    });
+
+    let encryptedString = '';
+    if(type === 'server') {
+      let result = [];
+      wordArrayToByteArray(salt).forEach(w => result.push(w));
+      wordArrayToByteArray(iv).forEach(w => result.push(w));
+      wordArrayToByteArray(encrypted.ciphertext).forEach(w => result.push(w));
+      encryptedString = CryptoJS.enc.Base64.stringify(byteArrayToWordArray(result));
+    } else {
+      encryptedString = salt.toString(CryptoJS.enc.Hex) + iv.toString(CryptoJS.enc.Hex) + CryptoJS.enc.Base64.stringify(encrypted.ciphertext);
+    }
+
+    return encryptedString;
+  }
+
+  document.getElementById('btn_signup').addEventListener('click', () => {
+    console.log(document.getElementById('email').value);
+    axios
+        .post('/member/signup', {
+          email: document.getElementById('email').value,
+          name: document.getElementById('name').value,
+          password: encrypt(document.getElementById('password').value, 'server')
+        })
+        .then((res) => {
+          alert('이메일 인증을 통해 가입을 완료해주세요.');
+          window.location.reload();
+        })
+        .catch((e) => {
+          alert(e);
+        });
+    });
+});
+</script>
+<body>
+<div class="wrap flex_center width_100">
+    <input type="text" id="email" placeholder="Email" />
+    <input type="text" id="name" placeholder="Name" />
+    <input type="password" id="password" placeholder="Password" />
+    <input type="password" id="password_confirm" placeholder="Password confirm" />
+    <button id="btn_signup">가입</button>
+</div>
+</body>
+</html>

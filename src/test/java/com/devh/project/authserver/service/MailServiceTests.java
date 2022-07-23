@@ -14,10 +14,17 @@ public class MailServiceTests {
 
     @Test
     public void test() {
+
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo("tjfdkrgjstmd@naver.com");
         mailMessage.setSubject("test");
-        mailMessage.setText("message !");
+
+        String content =
+                "<h1>title</h1>" +
+                "<p>아래 링크를 클릭하여 회원 가입을 완료하세요.</p>" +
+                "<p>http://127.0.0.1:8888/member/signup/complete?email=aaa&authKey=bbb</p>";
+
+        mailMessage.setText(content);
         mailService.sendEmail(mailMessage);
     }
 }

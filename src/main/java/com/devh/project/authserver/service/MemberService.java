@@ -29,6 +29,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final RedisMemberRepository redisMemberRepository;
     private final AuthKeyUtils authKeyUtils;
+    private final MailService mailService;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public MemberSignUpResponseVO signUpByMemberSignUpRequestVO(MemberSignUpRequestVO memberSignUpRequestVO) throws DuplicateEmailException, PasswordException {
@@ -39,7 +40,7 @@ public class MemberService {
         /* save temporary until email authentication */
         RedisMember redisMember = redisMemberRepository.save(toRedisMember(memberSignUpRequestVO));
         /* send mail */
-        
+		mailService.sendSignupValidationMail(memberSignUpRequestVO.getEmail(), redisMember.getAuthKey());
         /* return sign up response */
         return MemberSignUpResponseVO.builder()
             	.signUpStatus(email.equals(redisMember.getEmail()) ? SignUpStatus.REQUESTED : SignUpStatus.ERROR)
@@ -80,7 +81,8 @@ public class MemberService {
     		return RedisMember.builder()
     				.email(memberSignUpRequestVO.getEmail())
     				.name(memberSignUpRequestVO.getName())
-    				.password(passwordEncoder.encode(aes256Utils.decrypt(memberSignUpRequestVO.getPassword())))
+//    				.password(passwordEncoder.encode(aes256Utils.decrypt(memberSignUpRequestVO.getPassword())))
+					.password(passwordEncoder.encode(memberSignUpRequestVO.getPassword()))
     				.authKey(authKeyUtils.generateAuthKey())
     				.build();
     	} catch (Exception e) {

@@ -8,7 +8,7 @@ server:
 # https://sabarada.tistory.com/105
 
 aes:
-  key: devh
+  key: devh0000000000000000000000000000
 
 auth:
   key:
