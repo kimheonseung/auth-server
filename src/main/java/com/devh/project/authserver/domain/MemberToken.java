@@ -1,5 +1,6 @@
 package com.devh.project.authserver.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,26 +11,27 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
 
 @Entity
 @Builder
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"id", "email"})
+@EqualsAndHashCode(of = {"id", "member"})
 @ToString
-public class Member implements Serializable {
+public class MemberToken implements Serializable {
     @Id @GeneratedValue
     private Long id;
+    @OneToOne
+    @JoinColumn(name="member_email", referencedColumnName = "email")
+    private Member member;
     @Column(nullable = false, unique = true)
-    private String email;
-    private String name;
-    private String password;
+    private String refreshToken;
 
-    public Member(Long id, String email, String name, String password) {
-        this.id = id;
-        this.email = email;
-        this.name = name;
-        this.password = password;
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

@@ -1,15 +1,15 @@
 package com.devh.project.authserver.util;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.security.NoSuchAlgorithmException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.security.NoSuchAlgorithmException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthKeyUtilsTests {
@@ -27,6 +27,6 @@ public class AuthKeyUtilsTests {
 		// when
 		String authKey = authKeyUtils.generateAuthKey();
 		// then
-		assertTrue(authKey.length() == 16);
+		assertEquals(authKey.length(), 16);
 	}
 }

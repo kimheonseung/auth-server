@@ -1,51 +1,24 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Sign Up</title>
 </head>
-<script th:src="@{/scripts/axios.min.js}"></script>
-<script th:src="@{/scripts/cryptojs.min.js}"></script>
-<script th:src="@{/scripts/cryptojs_converter.js}"></script>
+<!--<link type="text/css" th:href="@{/css/loading.css}" rel="stylesheet"/>-->
+<script th:src="@{/lib/axios.min.js}"></script>
+<script th:src="@{/lib/cryptojs.min.js}"></script>
+<script th:src="@{/scripts/aes256.js}"></script>
 <script type="text/javascript">
+
 const key = "[[${aesKey}]]";
 document.addEventListener("DOMContentLoaded", (evt) => {
-
-  const encrypt = (str, type) => {
-    const salt = CryptoJS.lib.WordArray.random(128 / 8);
-    const iv = CryptoJS.lib.WordArray.random(128 / 8);
-    const key256Bits = CryptoJS.PBKDF2(key, salt, {
-      keySize: 256 / 32,
-      iterations: 1000
-    });
-    const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse("test"), key256Bits, {
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
-    });
-
-    let encryptedString = '';
-    if(type === 'server') {
-      let result = [];
-      wordArrayToByteArray(salt).forEach(w => result.push(w));
-      wordArrayToByteArray(iv).forEach(w => result.push(w));
-      wordArrayToByteArray(encrypted.ciphertext).forEach(w => result.push(w));
-      encryptedString = CryptoJS.enc.Base64.stringify(byteArrayToWordArray(result));
-    } else {
-      encryptedString = salt.toString(CryptoJS.enc.Hex) + iv.toString(CryptoJS.enc.Hex) + CryptoJS.enc.Base64.stringify(encrypted.ciphertext);
-    }
-
-    return encryptedString;
-  }
-
   document.getElementById('btn_signup').addEventListener('click', () => {
-    console.log(document.getElementById('email').value);
     axios
         .post('/member/signup', {
           email: document.getElementById('email').value,
           name: document.getElementById('name').value,
-          password: encrypt(document.getElementById('password').value, 'server')
+          password: aes256Service().encrypt(document.getElementById('password').value)
         })
         .then((res) => {
           alert('이메일 인증을 통해 가입을 완료해주세요.');
@@ -65,5 +38,9 @@ document.addEventListener("DOMContentLoaded", (evt) => {
     <input type="password" id="password_confirm" placeholder="Password confirm" />
     <button id="btn_signup">가입</button>
 </div>
+
+<!--<div id="loading">-->
+<!--    <img id="img_loading" th:src="@{/images/loading.gif}" alt="loading...">-->
+<!--</div>-->
 </body>
 </html>

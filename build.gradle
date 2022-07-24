@@ -37,6 +37,10 @@ dependencies {
     implementation 'org.springframework.security:spring-security-crypto'
     /* lang3 */
     implementation 'org.apache.commons:commons-lang3'
+    /* Json Web Token */
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    /* Json Web Token signWith noClassDefFoundError: javax/xml/bind/DatatypeConverter Java 11 Issue */
+    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.1'
 }
 
 tasks.named('test') {

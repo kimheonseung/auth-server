@@ -2,7 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,java,gradle,eclipse,intellij,visualstudiocode
 
 config/mail-config.yml
-
+config/jwt-config.yml
 ### Eclipse ###
 .metadata
 bin/

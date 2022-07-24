@@ -1,5 +1,6 @@
 package com.devh.project.authserver.configuration;
 
+import com.devh.project.authserver.configuration.vo.JwtConfigVO;
 import com.devh.project.authserver.configuration.vo.MailConfigVO;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -32,6 +33,15 @@ public class EnvironmentPostProcessorImpl implements EnvironmentPostProcessor {
             mailProperties.put("mail.smtp.timeout", mailConfigVO.getSmtp().getTimeout());
             mailProperties.put("mail.smtp.writetimeout", mailConfigVO.getSmtp().getWritetimeout());
             environment.getPropertySources().addFirst(new PropertiesPropertySource("mail", mailProperties));
+
+            JwtConfigVO jwtConfigVO = new Yaml(new Constructor(JwtConfigVO.class)).load(new FileReader("config/jwt-config.yml"));
+            Properties jwtProperties = new Properties();
+            jwtProperties.put("jwt.issuer", jwtConfigVO.getIssuer());
+            jwtProperties.put("jwt.secretKey", jwtConfigVO.getSecretKey());
+            jwtProperties.put("jwt.header", jwtConfigVO.getHeader());
+            jwtProperties.put("jwt.expire.access", jwtConfigVO.getExpire().getAccess());
+            jwtProperties.put("jwt.expire.refresh", jwtConfigVO.getExpire().getRefresh());
+            environment.getPropertySources().addFirst(new PropertiesPropertySource("jwt", jwtProperties));
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed to start post process ... - " + e.getMessage());

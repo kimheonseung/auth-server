@@ -7,6 +7,14 @@ server:
 # redis
 # https://sabarada.tistory.com/105
 
+jwt:
+  issuer: ${jwt.issuer}
+  secretKey: ${jwt.secretKey}
+  header: ${jwt.header}
+  expire:
+    access: ${jwt.expire.access}
+    refresh: ${jwt.expire.refresh}
+
 aes:
   key: devh0000000000000000000000000000
 

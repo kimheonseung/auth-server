@@ -1,0 +1,19 @@
+#loading {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  background: rgb(255, 255, 255);
+  opacity: 70%;
+  text-align: center;
+}
+
+#img_loading {
+  width: 200px;
+  height: 200px;
+}
