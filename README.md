@@ -29,8 +29,15 @@
   - 프로세스
     1. email, password를 통해 인증 요청
     2. 인증 후 토큰 발행 (인증 토큰, 리프레시 토큰)
+    3. 리프레시 토큰은 member_refresh 테이블에 저장
   - 암호화
     - 요청 시 password는 AES256 암호화
+  
+- 인증 만료
+  - 프로세스
+    1. 로그아웃 요청 (header에 토큰 첨부)
+    2. 토큰의 subject와 요청 email이 같은지 검증
+    3. 같으면 member_refresh 테이블에서 제거
     
 작성중
 
