@@ -19,7 +19,8 @@ import java.io.Serializable;
 @EqualsAndHashCode(of = {"id", "email"})
 @ToString
 public class Member implements Serializable {
-    @Id @GeneratedValue
+	private static final long serialVersionUID = -2158602508448402581L;
+	@Id @GeneratedValue
     private Long id;
     @Column(nullable = false, unique = true)
     private String email;

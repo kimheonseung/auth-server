@@ -1,21 +1,23 @@
 package com.devh.project.authserver.util;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.devh.project.authserver.constant.TokenStatus;
 import com.devh.project.authserver.vo.TokenVO;
 import com.devh.project.common.util.ExceptionUtils;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @Component
 @Slf4j
@@ -31,7 +33,7 @@ public class JwtUtils {
     @Value("${jwt.expire.refresh}")
     private int refreshExpire;
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /* default signature algorithm */
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
@@ -118,13 +120,5 @@ public class JwtUtils {
     private Date getExpirationDate(String token) throws ExpiredJwtException, MalformedJwtException {
         final Claims claims = this.getClaimsFromToken(token);
         return claims.getExpiration();
-    }
-
-    private String parseDate(Date date) {
-        try {
-            return sdf.format(date);
-        } catch (Exception e) {
-            return "";
-        }
     }
 }

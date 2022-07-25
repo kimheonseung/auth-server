@@ -1,7 +1,8 @@
 package com.devh.project.authserver.configuration;
 
-import com.devh.project.authserver.configuration.vo.JwtConfigVO;
-import com.devh.project.authserver.configuration.vo.MailConfigVO;
+import java.io.FileReader;
+import java.util.Properties;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -9,11 +10,8 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.FileReader;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.util.Properties;
+import com.devh.project.authserver.configuration.vo.JwtConfigVO;
+import com.devh.project.authserver.configuration.vo.MailConfigVO;
 
 public class EnvironmentPostProcessorImpl implements EnvironmentPostProcessor {
 
@@ -49,27 +47,5 @@ public class EnvironmentPostProcessorImpl implements EnvironmentPostProcessor {
         }
 
     }
-
-    private void databaseConnectionTest(String url, String username, String password) {
-        boolean isConnected = false;
-        while(!isConnected) {
-            try (
-                    Connection conn = DriverManager.getConnection(url, username, password)
-            ) {
-                DatabaseMetaData metadata = conn.getMetaData();
-                System.out.printf("%s - %d.%d [%s - %s]%n",
-                        metadata.getDatabaseProductName(),
-                        metadata.getDatabaseMajorVersion(),
-                        metadata.getDatabaseMinorVersion(),
-                        metadata.getDriverName(),
-                        metadata.getDriverVersion()
-                );
-                isConnected = true;
-                System.out.println("Success to test database connection !");
-            } catch (Exception e) {
-                System.out.println("Failed to test database connection ... - " + e.getMessage());
-                try { Thread.sleep(3000L); } catch (InterruptedException ignored) {}
-            }
-        }
-    }
+    
 }

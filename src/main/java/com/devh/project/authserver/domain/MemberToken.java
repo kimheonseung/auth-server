@@ -23,7 +23,8 @@ import java.io.Serializable;
 @EqualsAndHashCode(of = {"id", "member"})
 @ToString
 public class MemberToken implements Serializable {
-    @Id @GeneratedValue
+	private static final long serialVersionUID = -4514969123821169077L;
+	@Id @GeneratedValue
     private Long id;
     @OneToOne
     @JoinColumn(name="member_email", referencedColumnName = "email")
