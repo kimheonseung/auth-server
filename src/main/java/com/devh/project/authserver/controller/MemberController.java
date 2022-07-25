@@ -1,12 +1,18 @@
 package com.devh.project.authserver.controller;
 
 import com.devh.project.authserver.exception.DuplicateEmailException;
+import com.devh.project.authserver.exception.LoginException;
+import com.devh.project.authserver.exception.LogoutException;
 import com.devh.project.authserver.exception.PasswordException;
+import com.devh.project.authserver.exception.RefreshException;
+import com.devh.project.authserver.exception.SignUpException;
 import com.devh.project.authserver.service.MemberService;
 import com.devh.project.authserver.vo.MemberLoginRequestVO;
 import com.devh.project.authserver.vo.MemberLoginResponseVO;
 import com.devh.project.authserver.vo.MemberLogoutRequestVO;
 import com.devh.project.authserver.vo.MemberLogoutResponseVO;
+import com.devh.project.authserver.vo.MemberRefreshRequestVO;
+import com.devh.project.authserver.vo.MemberRefreshResponseVO;
 import com.devh.project.authserver.vo.MemberSignUpRequestVO;
 import com.devh.project.authserver.vo.MemberSignUpResponseVO;
 import com.devh.project.common.constant.ApiStatus;
@@ -45,7 +51,7 @@ public class MemberController {
 	}
 
     @PostMapping("/signup")
-    public ApiResponseVO<MemberSignUpResponseVO> signUp(@Valid @RequestBody MemberSignUpRequestVO memberSignUpRequestVO) throws DuplicateEmailException, PasswordException {
+    public ApiResponseVO<MemberSignUpResponseVO> signUp(@Valid @RequestBody MemberSignUpRequestVO memberSignUpRequestVO) throws DuplicateEmailException, PasswordException, SignUpException {
         return ApiResponseVO.success(ApiStatus.Success.OK, memberService.signUpByMemberSignUpRequestVO(memberSignUpRequestVO));
     }
     
@@ -64,14 +70,20 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-	public MemberLoginResponseVO login(@Valid @RequestBody MemberLoginRequestVO memberLoginRequestVO) {
+	public ApiResponseVO<MemberLoginResponseVO> login(@Valid @RequestBody MemberLoginRequestVO memberLoginRequestVO) throws LoginException {
     	log.info(memberLoginRequestVO.toString());
-    	return memberService.login(memberLoginRequestVO);
+    	return ApiResponseVO.success(ApiStatus.Success.OK, memberService.login(memberLoginRequestVO));
 	}
 
 	@PostMapping("/logout")
-	public MemberLogoutResponseVO logout(@Valid @RequestBody MemberLogoutRequestVO memberLogoutRequestVO, HttpServletRequest request) {
+	public ApiResponseVO<MemberLogoutResponseVO> logout(@Valid @RequestBody MemberLogoutRequestVO memberLogoutRequestVO, HttpServletRequest request) throws LogoutException {
     	log.info(memberLogoutRequestVO.toString());
-		return memberService.logout(memberLogoutRequestVO, request);
+		return ApiResponseVO.success(ApiStatus.Success.OK, memberService.logout(memberLogoutRequestVO, request));
+	}
+	
+	@PostMapping("/refresh")
+	public ApiResponseVO<MemberRefreshResponseVO> refresh(@RequestBody MemberRefreshRequestVO memberRefreshRequestVO) throws RefreshException {
+		log.info(memberRefreshRequestVO.toString());
+		return ApiResponseVO.success(ApiStatus.Success.OK, memberService.refresh(memberRefreshRequestVO));
 	}
 }
