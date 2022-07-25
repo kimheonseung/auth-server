@@ -40,7 +40,7 @@ public class MemberRepositoryTests {
         @Test
         public void findByEmail() {
             // given
-            final String givenEmail = "devh@devh.com";
+            final String givenEmail = "test@test.com";
             // when
             Member member = memberRepository.findByEmail(givenEmail).orElseThrow();
             // then
