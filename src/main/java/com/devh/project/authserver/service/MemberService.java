@@ -26,15 +26,15 @@ import com.devh.project.authserver.util.AES256Utils;
 import com.devh.project.authserver.util.AuthKeyUtils;
 import com.devh.project.authserver.util.BCryptUtils;
 import com.devh.project.authserver.util.JwtUtils;
-import com.devh.project.authserver.vo.TokenVO;
-import com.devh.project.authserver.vo.member.LoginRequestVO;
-import com.devh.project.authserver.vo.member.LoginResponseVO;
-import com.devh.project.authserver.vo.member.LogoutRequestVO;
-import com.devh.project.authserver.vo.member.LogoutResponseVO;
-import com.devh.project.authserver.vo.member.RefreshRequestVO;
-import com.devh.project.authserver.vo.member.RefreshResponseVO;
-import com.devh.project.authserver.vo.member.SignUpRequestVO;
-import com.devh.project.authserver.vo.member.SignUpResponseVO;
+import com.devh.project.authserver.dto.TokenDTO;
+import com.devh.project.authserver.dto.member.LoginRequestDTO;
+import com.devh.project.authserver.dto.member.LoginResponseDTO;
+import com.devh.project.authserver.dto.member.LogoutRequestDTO;
+import com.devh.project.authserver.dto.member.LogoutResponseDTO;
+import com.devh.project.authserver.dto.member.RefreshRequestDTO;
+import com.devh.project.authserver.dto.member.RefreshResponseDTO;
+import com.devh.project.authserver.dto.member.SignUpRequestDTO;
+import com.devh.project.authserver.dto.member.SignUpResponseDTO;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
@@ -55,18 +55,18 @@ public class MemberService {
     private final BCryptUtils bcryptUtils;
     private final MailService mailService;
 
-    public SignUpResponseVO signUpByMemberSignUpRequestVO(SignUpRequestVO signUpRequestVO) throws DuplicateEmailException, PasswordException {
+    public SignUpResponseDTO signUpByMemberSignUpRequestVO(SignUpRequestDTO signUpRequestDTO) throws DuplicateEmailException, PasswordException {
     	try {
-    		final String email = signUpRequestVO.getEmail();
+    		final String email = signUpRequestDTO.getEmail();
     		/* exist check */
     		if(memberRepository.existsByEmail(email))
     			throw new DuplicateEmailException(email+" already exists.");
     		/* save temporary until email authentication */
-    		RedisMember redisMember = redisMemberRepository.save(toRedisMember(signUpRequestVO));
+    		RedisMember redisMember = redisMemberRepository.save(toRedisMember(signUpRequestDTO));
     		/* send mail */
-    		mailService.sendSignupValidationMail(signUpRequestVO.getEmail(), redisMember.getAuthKey());
+    		mailService.sendSignupValidationMail(signUpRequestDTO.getEmail(), redisMember.getAuthKey());
     		/* return sign up response */
-    		return SignUpResponseVO.builder()
+    		return SignUpResponseDTO.builder()
     				.signUpStatus(email.equals(redisMember.getEmail()) ? SignUpStatus.REQUESTED : SignUpStatus.ERROR)
     				.email(email)
     				.build();
@@ -77,7 +77,7 @@ public class MemberService {
 		}
     }
     
-    public SignUpResponseVO commitSignUpByEmailAndAuthKey(String email, String authKey) throws SignUpException {
+    public SignUpResponseDTO commitSignUpByEmailAndAuthKey(String email, String authKey) throws SignUpException {
     	try {
     		/* redis check */
         	RedisMember redisMember = redisMemberRepository.findById(email).orElse(null);
@@ -92,7 +92,7 @@ public class MemberService {
         	/* save */
         	Member member = memberRepository.save(toMember(redisMember));
         	redisMemberRepository.deleteById(email);
-        	return SignUpResponseVO.builder()
+        	return SignUpResponseDTO.builder()
                 	.signUpStatus(email.equals(member.getEmail()) ? SignUpStatus.COMPLETED : SignUpStatus.ERROR)
                 	.email(email)
                 	.build();
@@ -102,18 +102,18 @@ public class MemberService {
 		}
     }
 
-    public LoginResponseVO login(LoginRequestVO loginRequestVO) throws LoginException {
+    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) throws LoginException {
 
     	try {
-    		final String email = loginRequestVO.getEmail();
-    		String password = loginRequestVO.getPassword();
-			TokenVO tokenVO;
+    		final String email = loginRequestDTO.getEmail();
+    		String password = loginRequestDTO.getPassword();
+			TokenDTO tokenDTO;
 			password = aes256Utils.decrypt(password);
 			/* member check */
 			Member member = memberRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(email + " does not exists."));
 			if(bcryptUtils.matches(password, member.getPassword())) {
 				/* generate token */
-				tokenVO = jwtUtils.generateTokenByEmail(email);
+				tokenDTO = jwtUtils.generateTokenByEmail(email);
 			} else {
 				throw new PasswordException("password not matches");
 			}
@@ -122,10 +122,10 @@ public class MemberService {
 			MemberToken memberToken = memberTokenRepository.findByMember(member).orElse(MemberToken.builder()
 					.member(member)
 					.build());
-			memberToken.setRefreshToken(tokenVO.getRefreshToken());
+			memberToken.setRefreshToken(tokenDTO.getRefreshToken());
 			memberTokenRepository.save(memberToken);
-			return LoginResponseVO.builder()
-					.token(tokenVO)
+			return LoginResponseDTO.builder()
+					.token(tokenDTO)
 					.build();
 		} catch (Exception e) {
     		log.error(e.getMessage());
@@ -133,9 +133,9 @@ public class MemberService {
 		}
 	}
 
-	public LogoutResponseVO logout(LogoutRequestVO logoutRequestVO, HttpServletRequest httpServletRequest) throws LogoutException {
+	public LogoutResponseDTO logout(LogoutRequestDTO logoutRequestDTO, HttpServletRequest httpServletRequest) throws LogoutException {
     	try {
-    		final String memberEmail = logoutRequestVO.getEmail();
+    		final String memberEmail = logoutRequestDTO.getEmail();
     		final String tokenEmail = jwtUtils.getEmailFromRequest(httpServletRequest);
     		boolean result = false;
     		if(memberEmail.equals(tokenEmail)) {
@@ -144,7 +144,7 @@ public class MemberService {
     			result = true;
 			}
 
-    		return LogoutResponseVO.builder()
+    		return LogoutResponseDTO.builder()
     				.result(result)
     				.build();
 		} catch (Exception e) {
@@ -153,9 +153,9 @@ public class MemberService {
 		}
 	}
 	
-	public RefreshResponseVO refresh(RefreshRequestVO refreshRequestVO) throws RefreshException {
+	public RefreshResponseDTO refresh(RefreshRequestDTO refreshRequestDTO) throws RefreshException {
 		try {
-			final TokenVO requestToken = refreshRequestVO.getToken();
+			final TokenDTO requestToken = refreshRequestDTO.getToken();
 			final String accessToken = requestToken.getAccessToken();
 			final String refreshToken = requestToken.getRefreshToken();
 			
@@ -181,11 +181,11 @@ public class MemberService {
                         MemberToken memberToken = memberTokenRepository.findByMember(member).orElseThrow(TokenNotFoundException::new);
                         final String recordRefreshToken = memberToken.getRefreshToken();
                         if(refreshToken.equals(recordRefreshToken)) {
-                            TokenVO refreshTokenVO = jwtUtils.generateTokenByEmail(email);
+                            TokenDTO refreshTokenDTO = jwtUtils.generateTokenByEmail(email);
                             requestToken.setTokenStatus(TokenStatus.REFRESH_SUCCESS);
-                            requestToken.setAccessToken(refreshTokenVO.getAccessToken());
-                            requestToken.setRefreshToken(refreshTokenVO.getRefreshToken());
-                            memberToken.setRefreshToken(refreshTokenVO.getRefreshToken());
+                            requestToken.setAccessToken(refreshTokenDTO.getAccessToken());
+                            requestToken.setRefreshToken(refreshTokenDTO.getRefreshToken());
+                            memberToken.setRefreshToken(refreshTokenDTO.getRefreshToken());
                             memberTokenRepository.save(memberToken);
                         } else {
                         	requestToken.setTokenStatus(TokenStatus.REFRESH_FAIL);
@@ -208,7 +208,7 @@ public class MemberService {
 				}
             }
 			
-			return RefreshResponseVO.builder()
+			return RefreshResponseDTO.builder()
 					.token(requestToken)
 					.build();
 		} catch (Exception e) {
@@ -225,12 +225,12 @@ public class MemberService {
                 .build();
     }
     
-    private RedisMember toRedisMember(SignUpRequestVO memberSignUpRequestVO) throws PasswordException {
+    private RedisMember toRedisMember(SignUpRequestDTO memberSignUpRequestDTO) throws PasswordException {
     	try {
     		return RedisMember.builder()
-    				.email(memberSignUpRequestVO.getEmail())
-    				.name(memberSignUpRequestVO.getName())
-    				.password(bcryptUtils.encode(aes256Utils.decrypt(memberSignUpRequestVO.getPassword())))
+    				.email(memberSignUpRequestDTO.getEmail())
+    				.name(memberSignUpRequestDTO.getName())
+    				.password(bcryptUtils.encode(aes256Utils.decrypt(memberSignUpRequestDTO.getPassword())))
 //					.password(passwordEncoder.encode(memberSignUpRequestVO.getPassword()))
     				.authKey(authKeyUtils.generateAuthKey())
     				.build();

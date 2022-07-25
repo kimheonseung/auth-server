@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.devh.project.authserver.constant.TokenStatus;
-import com.devh.project.authserver.vo.TokenVO;
+import com.devh.project.authserver.dto.TokenDTO;
 import com.devh.project.common.util.ExceptionUtils;
 
 import io.jsonwebtoken.Claims;
@@ -39,11 +39,7 @@ public class JwtUtils {
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
 
     public String getEmailFromToken(String token) throws ExpiredJwtException, MalformedJwtException {
-        try {
-            return getClaimsFromToken(token).getSubject();
-        } catch (ExpiredJwtException | MalformedJwtException je) {
-            throw je;
-        }
+        return getClaimsFromToken(token).getSubject();
     }
 
     public String getEmailFromRequest(HttpServletRequest request) {
@@ -51,7 +47,7 @@ public class JwtUtils {
         return claims.getSubject();
     }
 
-    public TokenVO generateTokenByEmail(String email) {
+    public TokenDTO generateTokenByEmail(String email) {
         final Date now = new Date();
         final String accessToken = Jwts.builder()
                 .setIssuer(issuer)
@@ -65,7 +61,7 @@ public class JwtUtils {
                 .setExpiration(generateRefreshExpirationDate())
                 .signWith(SIGNATURE_ALGORITHM, secretKey.getBytes(StandardCharsets.UTF_8))
                 .compact();
-        return TokenVO.builder()
+        return TokenDTO.builder()
                 .tokenStatus(TokenStatus.LOGIN_SUCCESS)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

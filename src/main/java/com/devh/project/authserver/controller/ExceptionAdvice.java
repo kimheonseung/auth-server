@@ -3,7 +3,7 @@ package com.devh.project.authserver.controller;
 import com.devh.project.authserver.exception.DuplicateEmailException;
 import com.devh.project.authserver.exception.PasswordException;
 import com.devh.project.common.constant.ApiStatus;
-import com.devh.project.common.vo.ApiResponseVO;
+import com.devh.project.common.dto.ApiResponseDTO;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -24,15 +24,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ExceptionAdvice {
     @ExceptionHandler({MethodArgumentNotValidException.class})
-    public <T> ApiResponseVO<T> handleMethodArgumentNotValidException(Exception e) {
-        return ApiResponseVO.customError(ApiStatus.CustomError.VALIDATION_ERROR, e.getMessage());
+    public <T> ApiResponseDTO<T> handleMethodArgumentNotValidException(Exception e) {
+        return ApiResponseDTO.customError(ApiStatus.CustomError.VALIDATION_ERROR, e.getMessage());
     }
     @ExceptionHandler({DuplicateEmailException.class})
-    public <T> ApiResponseVO<T> handleDuplicateEmailException(Exception e) {
-        return ApiResponseVO.customError(ApiStatus.CustomError.DUPLICATE_EMAIL_ERROR, e.getMessage());
+    public <T> ApiResponseDTO<T> handleDuplicateEmailException(Exception e) {
+        return ApiResponseDTO.customError(ApiStatus.CustomError.DUPLICATE_EMAIL_ERROR, e.getMessage());
     }
     @ExceptionHandler({PasswordException.class})
-    public <T> ApiResponseVO<T> handlePasswordExceptionException(Exception e) {
-        return ApiResponseVO.customError(ApiStatus.CustomError.PASSWORD_ERROR, e.getMessage());
+    public <T> ApiResponseDTO<T> handlePasswordExceptionException(Exception e) {
+        return ApiResponseDTO.customError(ApiStatus.CustomError.PASSWORD_ERROR, e.getMessage());
     }
 }

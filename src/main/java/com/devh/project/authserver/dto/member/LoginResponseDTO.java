@@ -1,4 +1,6 @@
-package com.devh.project.authserver.vo.member;
+package com.devh.project.authserver.dto.member;
+
+import com.devh.project.authserver.dto.TokenDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +13,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class LogoutResponseVO {
-	private boolean result;
+public class LoginResponseDTO {
+    private TokenDTO token;
 }

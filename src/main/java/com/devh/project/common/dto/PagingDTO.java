@@ -1,4 +1,4 @@
-package com.devh.project.common.vo;
+package com.devh.project.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PagingVO {
+public class PagingDTO {
     /* 총 데이터 갯수 */
     private long total;
     /* 한 페이지에 보여질 갯수 */
@@ -44,14 +44,14 @@ public class PagingVO {
     /* 페이지 번호 목록 */
     private List<Integer> pageList;
 
-    public static PagingVO build(int page, int rows, long total) {
+    public static PagingDTO build(int page, int rows, long total) {
 
         final int tempEnd = (int) (Math.ceil(page / (double) pageListSize)) * pageListSize;
         final int start = tempEnd - (pageListSize - 1);
         final int totalPage = (int) Math.ceil(total / (double) rows);
         final int end = Math.min(totalPage, tempEnd);
 
-        return PagingVO.builder()
+        return PagingDTO.builder()
                 .page(page)
 //                .size(size)
                 .rows(rows)

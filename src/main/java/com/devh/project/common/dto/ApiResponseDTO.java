@@ -1,4 +1,4 @@
-package com.devh.project.common.vo;
+package com.devh.project.common.dto;
 
 import com.devh.project.common.constant.ApiStatus;
 import lombok.Builder;
@@ -28,16 +28,16 @@ import java.util.List;
  */
 @Builder
 @Getter
-public class ApiResponseVO<T> {
+public class ApiResponseDTO<T> {
     private LocalDateTime timestamp;
     private int status;
     private String message;
     private String description;
     private List<T> dataArray;
-    private PagingVO paging;
+    private PagingDTO paging;
 
-    public static <T> ApiResponseVO<T> success(ApiStatus.Success status) {
-        return ApiResponseVO.<T>builder()
+    public static <T> ApiResponseDTO<T> success(ApiStatus.Success status) {
+        return ApiResponseDTO.<T>builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.getCode())
                 .message(status.getStatus())
@@ -45,8 +45,8 @@ public class ApiResponseVO<T> {
                 .build();
     }
 
-    public static <T> ApiResponseVO<T> success(ApiStatus.Success status, List<T> dataArray) {
-        return ApiResponseVO.<T>builder()
+    public static <T> ApiResponseDTO<T> success(ApiStatus.Success status, List<T> dataArray) {
+        return ApiResponseDTO.<T>builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.getCode())
                 .message(status.getStatus())
@@ -55,21 +55,21 @@ public class ApiResponseVO<T> {
                 .build();
     }
 
-    public static <T> ApiResponseVO<T> success(ApiStatus.Success status, List<T> dataArray, PagingVO pagingVO) {
-        return ApiResponseVO.<T>builder()
+    public static <T> ApiResponseDTO<T> success(ApiStatus.Success status, List<T> dataArray, PagingDTO pagingDTO) {
+        return ApiResponseDTO.<T>builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.getCode())
                 .message(status.getStatus())
                 .description(status.getDescription())
-                .paging(pagingVO)
+                .paging(pagingDTO)
                 .dataArray(dataArray)
                 .build();
     }
 
-    public static <T> ApiResponseVO<T> success(ApiStatus.Success status, T data) {
+    public static <T> ApiResponseDTO<T> success(ApiStatus.Success status, T data) {
         List<T> dataArray = new ArrayList<>();
         dataArray.add(data);
-        return ApiResponseVO.<T>builder()
+        return ApiResponseDTO.<T>builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.getCode())
                 .message(status.getStatus())
@@ -78,8 +78,8 @@ public class ApiResponseVO<T> {
                 .build();
     }
 
-    public static <T> ApiResponseVO<T> serverError(ApiStatus.ServerError status, String stacktrace) {
-        return ApiResponseVO.<T>builder()
+    public static <T> ApiResponseDTO<T> serverError(ApiStatus.ServerError status, String stacktrace) {
+        return ApiResponseDTO.<T>builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.getCode())
                 .message(status.getStatus())
@@ -87,8 +87,8 @@ public class ApiResponseVO<T> {
                 .build();
     }
 
-    public static <T> ApiResponseVO<T> customError(ApiStatus.CustomError status, String stacktrace) {
-        return ApiResponseVO.<T>builder()
+    public static <T> ApiResponseDTO<T> customError(ApiStatus.CustomError status, String stacktrace) {
+        return ApiResponseDTO.<T>builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.getCode())
                 .message(status.getStatus())

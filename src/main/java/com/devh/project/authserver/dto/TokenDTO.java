@@ -1,4 +1,4 @@
-package com.devh.project.authserver.vo;
+package com.devh.project.authserver.dto;
 
 import com.devh.project.authserver.constant.TokenStatus;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class TokenVO {
+public class TokenDTO {
     private TokenStatus tokenStatus;
     private String accessToken;
     private String refreshToken;
