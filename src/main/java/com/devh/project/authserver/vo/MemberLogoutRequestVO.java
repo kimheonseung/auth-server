@@ -12,4 +12,8 @@ import javax.validation.constraints.Email;
 public class MemberLogoutRequestVO {
     @Email(message = "Not Valid Email")
     private String email;
+    
+    public MemberLogoutRequestVO(String email) {
+    	this.email = email;
+    }
 }
