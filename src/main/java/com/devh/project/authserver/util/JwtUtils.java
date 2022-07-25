@@ -38,7 +38,7 @@ public class JwtUtils {
     /* default signature algorithm */
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
 
-    public String getUsernameFromToken(String token) throws ExpiredJwtException, MalformedJwtException {
+    public String getEmailFromToken(String token) throws ExpiredJwtException, MalformedJwtException {
         try {
             return getClaimsFromToken(token).getSubject();
         } catch (ExpiredJwtException | MalformedJwtException je) {
@@ -73,14 +73,14 @@ public class JwtUtils {
     }
 
     public boolean validateToken(String token) {
-        final String tokenUsername = this.getUsernameFromToken(token);
+        final String tokenUsername = this.getEmailFromToken(token);
         return (
                 tokenUsername != null && !isTokenExpired(token)
         );
     }
 
     public boolean isRefreshNecessary(String token) {
-        final String tokenUsername = this.getUsernameFromToken(token);
+        final String tokenUsername = this.getEmailFromToken(token);
         return (
                 tokenUsername != null && isTokenExpired(token)
         );
