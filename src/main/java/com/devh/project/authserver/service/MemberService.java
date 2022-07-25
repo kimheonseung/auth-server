@@ -1,5 +1,12 @@
 package com.devh.project.authserver.service;
 
+import java.util.NoSuchElementException;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.devh.project.authserver.constant.SignUpStatus;
 import com.devh.project.authserver.domain.Member;
 import com.devh.project.authserver.domain.MemberToken;
@@ -14,6 +21,7 @@ import com.devh.project.authserver.repository.MemberTokenRepository;
 import com.devh.project.authserver.repository.RedisMemberRepository;
 import com.devh.project.authserver.util.AES256Utils;
 import com.devh.project.authserver.util.AuthKeyUtils;
+import com.devh.project.authserver.util.BCryptUtils;
 import com.devh.project.authserver.util.JwtUtils;
 import com.devh.project.authserver.vo.MemberLoginRequestVO;
 import com.devh.project.authserver.vo.MemberLoginResponseVO;
@@ -22,15 +30,9 @@ import com.devh.project.authserver.vo.MemberLogoutResponseVO;
 import com.devh.project.authserver.vo.MemberSignUpRequestVO;
 import com.devh.project.authserver.vo.MemberSignUpResponseVO;
 import com.devh.project.authserver.vo.TokenVO;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
@@ -44,8 +46,8 @@ public class MemberService {
     private final RedisMemberRepository redisMemberRepository;
     private final AuthKeyUtils authKeyUtils;
     private final JwtUtils jwtUtils;
+    private final BCryptUtils bcryptUtils;
     private final MailService mailService;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public MemberSignUpResponseVO signUpByMemberSignUpRequestVO(MemberSignUpRequestVO memberSignUpRequestVO) throws DuplicateEmailException, PasswordException {
         final String email = memberSignUpRequestVO.getEmail();
@@ -91,7 +93,7 @@ public class MemberService {
 			TokenVO tokenVO;
 			password = aes256Utils.decrypt(password);
 			Member member = memberRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(email + " does not exists."));
-			if(passwordEncoder.matches(password, member.getPassword())) {
+			if(bcryptUtils.matches(password, member.getPassword())) {
 				tokenVO = jwtUtils.generateTokenByEmail(email);
 			} else {
 				throw new PasswordException("password not matches");
@@ -141,7 +143,7 @@ public class MemberService {
     		return RedisMember.builder()
     				.email(memberSignUpRequestVO.getEmail())
     				.name(memberSignUpRequestVO.getName())
-    				.password(passwordEncoder.encode(aes256Utils.decrypt(memberSignUpRequestVO.getPassword())))
+    				.password(bcryptUtils.encode(aes256Utils.decrypt(memberSignUpRequestVO.getPassword())))
 //					.password(passwordEncoder.encode(memberSignUpRequestVO.getPassword()))
     				.authKey(authKeyUtils.generateAuthKey())
     				.build();
