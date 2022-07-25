@@ -1,4 +1,4 @@
-package com.devh.project.authserver.vo;
+package com.devh.project.authserver.vo.member;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,16 +10,13 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @NoArgsConstructor
 @ToString
-public class MemberSignUpRequestVO {
+public class LoginRequestVO {
     @Email(message = "Not Valid Email")
     private String email;
-    @NotBlank(message = "Name is mandatory")
-    private String name;
     @NotBlank(message = "Password is mandatory")
     private String password;
-    public MemberSignUpRequestVO(String email, String name, String password) {
+    public LoginRequestVO(String email, String password) {
         this.email = email;
-        this.name = name;
         this.password = password;
     }
 }

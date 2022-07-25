@@ -1,4 +1,4 @@
-package com.devh.project.authserver.vo;
+package com.devh.project.authserver.vo.member;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +9,11 @@ import javax.validation.constraints.Email;
 @Getter
 @NoArgsConstructor
 @ToString
-public class MemberLogoutRequestVO {
+public class LogoutRequestVO {
     @Email(message = "Not Valid Email")
     private String email;
     
-    public MemberLogoutRequestVO(String email) {
+    public LogoutRequestVO(String email) {
     	this.email = email;
     }
 }

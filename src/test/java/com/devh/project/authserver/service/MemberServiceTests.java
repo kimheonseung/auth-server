@@ -44,15 +44,15 @@ import com.devh.project.authserver.util.AES256Utils;
 import com.devh.project.authserver.util.AuthKeyUtils;
 import com.devh.project.authserver.util.BCryptUtils;
 import com.devh.project.authserver.util.JwtUtils;
-import com.devh.project.authserver.vo.MemberLoginRequestVO;
-import com.devh.project.authserver.vo.MemberLoginResponseVO;
-import com.devh.project.authserver.vo.MemberLogoutRequestVO;
-import com.devh.project.authserver.vo.MemberLogoutResponseVO;
-import com.devh.project.authserver.vo.MemberRefreshRequestVO;
-import com.devh.project.authserver.vo.MemberRefreshResponseVO;
-import com.devh.project.authserver.vo.MemberSignUpRequestVO;
-import com.devh.project.authserver.vo.MemberSignUpResponseVO;
 import com.devh.project.authserver.vo.TokenVO;
+import com.devh.project.authserver.vo.member.LoginRequestVO;
+import com.devh.project.authserver.vo.member.LoginResponseVO;
+import com.devh.project.authserver.vo.member.LogoutRequestVO;
+import com.devh.project.authserver.vo.member.LogoutResponseVO;
+import com.devh.project.authserver.vo.member.RefreshRequestVO;
+import com.devh.project.authserver.vo.member.RefreshResponseVO;
+import com.devh.project.authserver.vo.member.SignUpRequestVO;
+import com.devh.project.authserver.vo.member.SignUpResponseVO;
 
 @ExtendWith(MockitoExtension.class)
 @Transactional
@@ -89,7 +89,7 @@ public class MemberServiceTests {
                 final String givenEmail = "devh@devh.com";
                 final String givenPassword = "tMUSeRyXcMH9gaZ7wFGs1aFVVj22NFPbwTZhhFvDXbuLdU+Ym2QoyydNF5M1T7gg"; // test
                 final String givenName = "devh";
-                final MemberSignUpRequestVO memberSignUpRequestVO = new MemberSignUpRequestVO(givenEmail, givenName, givenPassword);
+                final SignUpRequestVO signUpRequestVO = new SignUpRequestVO(givenEmail, givenName, givenPassword);
                 given(memberRepository.existsByEmail(givenEmail)).willReturn(false);
                 given(redisMemberRepository.save(any(RedisMember.class))).willReturn(RedisMember.builder()
                 		.email(givenEmail)
@@ -100,10 +100,10 @@ public class MemberServiceTests {
                 doNothing().when(mailService).sendSignupValidationMail(any(String.class), any(String.class));
                 given(aes256Utils.decrypt(givenPassword)).willReturn("test");
                 // when
-                MemberSignUpResponseVO memberSignUpResponseVO = memberService.signUpByMemberSignUpRequestVO(memberSignUpRequestVO);
+                SignUpResponseVO signUpResponseVO = memberService.signUpByMemberSignUpRequestVO(signUpRequestVO);
                 // then
-                assertEquals(memberSignUpResponseVO.getSignUpStatus(), SignUpStatus.REQUESTED);
-                assertEquals(memberSignUpResponseVO.getEmail(), givenEmail);
+                assertEquals(signUpResponseVO.getSignUpStatus(), SignUpStatus.REQUESTED);
+                assertEquals(signUpResponseVO.getEmail(), givenEmail);
             }
             @Test
             @DisplayName("인증메일을 통해 임시 회원 정보 DB 저장 로직")
@@ -119,10 +119,10 @@ public class MemberServiceTests {
             	given(memberRepository.existsByEmail(givenEmail)).willReturn(false);
             	given(memberRepository.save(any(Member.class))).willAnswer(i -> i.getArguments()[0]);
             	// when
-            	MemberSignUpResponseVO memberSignUpResponseVO = memberService.commitSignUpByEmailAndAuthKey(givenEmail, givenAuthKey);
+            	SignUpResponseVO signUpResponseVO = memberService.commitSignUpByEmailAndAuthKey(givenEmail, givenAuthKey);
             	// then
-            	assertEquals(memberSignUpResponseVO.getSignUpStatus(), SignUpStatus.COMPLETED);
-            	assertEquals(memberSignUpResponseVO.getEmail(), givenEmail);
+            	assertEquals(signUpResponseVO.getSignUpStatus(), SignUpStatus.COMPLETED);
+            	assertEquals(signUpResponseVO.getEmail(), givenEmail);
             }
     	}
 
@@ -147,11 +147,11 @@ public class MemberServiceTests {
                 .refreshToken(givenRefreshToken)
             .build());
             // when
-            MemberLoginResponseVO memberLoginResponseVO = memberService.login(new MemberLoginRequestVO(givenMemberEmail, givenPassword));
+            LoginResponseVO loginResponseVO = memberService.login(new LoginRequestVO(givenMemberEmail, givenPassword));
             // then
-            assertEquals(memberLoginResponseVO.getToken().getTokenStatus(), TokenStatus.LOGIN_SUCCESS);
-            assertEquals(memberLoginResponseVO.getToken().getAccessToken(), givenAccessToken);
-            assertEquals(memberLoginResponseVO.getToken().getRefreshToken(), givenRefreshToken);
+            assertEquals(loginResponseVO.getToken().getTokenStatus(), TokenStatus.LOGIN_SUCCESS);
+            assertEquals(loginResponseVO.getToken().getAccessToken(), givenAccessToken);
+            assertEquals(loginResponseVO.getToken().getRefreshToken(), givenRefreshToken);
         }
         @Test
         @DisplayName("로그아웃 - 토큰 제거")
@@ -165,7 +165,7 @@ public class MemberServiceTests {
         			.password("$2a$10$XOzzm0y.T5QU6Reb6TUyUusBodpFNzcHJEYUZ0YikF3bF9h7ZMsdO")
         			.build()));
         	// when
-        	MemberLogoutResponseVO response = memberService.logout(new MemberLogoutRequestVO(givenEmail), new MockHttpServletRequest());
+        	LogoutResponseVO response = memberService.logout(new LogoutRequestVO(givenEmail), new MockHttpServletRequest());
         	System.out.println(response);
         }
         @Test
@@ -193,11 +193,11 @@ public class MemberServiceTests {
         			.refreshToken(givenRefreshToken)
         			.build()));
         	// when
-        	MemberRefreshResponseVO memberRefreshResponseVO = memberService.refresh(MemberRefreshRequestVO.builder().token(tokenVO).build());
+        	RefreshResponseVO refreshResponseVO = memberService.refresh(RefreshRequestVO.builder().token(tokenVO).build());
         	// then
-        	assertEquals(memberRefreshResponseVO.getToken().getTokenStatus(), TokenStatus.REFRESH_SUCCESS);
-        	assertEquals(memberRefreshResponseVO.getToken().getAccessToken(), "newAccess");
-        	assertEquals(memberRefreshResponseVO.getToken().getRefreshToken(), "newRefresh");
+        	assertEquals(refreshResponseVO.getToken().getTokenStatus(), TokenStatus.REFRESH_SUCCESS);
+        	assertEquals(refreshResponseVO.getToken().getAccessToken(), "newAccess");
+        	assertEquals(refreshResponseVO.getToken().getRefreshToken(), "newRefresh");
         }
     }
 
@@ -214,10 +214,10 @@ public class MemberServiceTests {
                 final String givenEmail = "devh@devh.com";
                 final String givenPassword = "tMUSeRyXcMH9gaZ7wFGs1aFVVj22NFPbwTZhhFvDXbuLdU+Ym2QoyydNF5M1T7gg"; // test
                 final String givenName = "devh";
-                final MemberSignUpRequestVO memberSignUpRequestVO = new MemberSignUpRequestVO(givenEmail, givenName, givenPassword);
+                final SignUpRequestVO signUpRequestVO = new SignUpRequestVO(givenEmail, givenName, givenPassword);
                 given(memberRepository.existsByEmail(givenEmail)).willReturn(true);
                 // then
-                assertThrows(DuplicateEmailException.class, () -> memberService.signUpByMemberSignUpRequestVO(memberSignUpRequestVO));
+                assertThrows(DuplicateEmailException.class, () -> memberService.signUpByMemberSignUpRequestVO(signUpRequestVO));
             }
             @Test
             @DisplayName("가입 요청 - 비밀번호 예외")
@@ -226,11 +226,11 @@ public class MemberServiceTests {
                 final String givenEmail = "devh@devh.com";
                 final String givenPassword = "tMUSeRyXcMH9gaZ7wFGs1aFVVj22NFPbwTZhhFvDXbuLdU+Ym2QoyydNF5M1T7gg"; // test
                 final String givenName = "devh";
-                final MemberSignUpRequestVO memberSignUpRequestVO = new MemberSignUpRequestVO(givenEmail, givenName, givenPassword);
+                final SignUpRequestVO signUpRequestVO = new SignUpRequestVO(givenEmail, givenName, givenPassword);
                 given(memberRepository.existsByEmail(givenEmail)).willReturn(false);
                 given(aes256Utils.decrypt(givenPassword)).willThrow(new InvalidKeyException("password error test !"));
                 // then
-                assertThrows(PasswordException.class, () -> memberService.signUpByMemberSignUpRequestVO(memberSignUpRequestVO));
+                assertThrows(PasswordException.class, () -> memberService.signUpByMemberSignUpRequestVO(signUpRequestVO));
             }
             @Test
             @DisplayName("인증메일 검증 - 레디스에 해당 정보가 존재하지 않음")
@@ -287,7 +287,7 @@ public class MemberServiceTests {
     			given(aes256Utils.decrypt(givenPassword)).willReturn("test");
     			given(memberRepository.findByEmail(givenEmail)).willReturn(Optional.empty());
     			// then 
-    			assertThrows(LoginException.class, () -> memberService.login(new MemberLoginRequestVO(givenEmail, givenPassword)));
+    			assertThrows(LoginException.class, () -> memberService.login(new LoginRequestVO(givenEmail, givenPassword)));
         	}
     		@Test
         	@DisplayName("로그인 - 비밀번호 예외")
@@ -304,7 +304,7 @@ public class MemberServiceTests {
     					.build()));
     			given(bcryptUtils.matches("test", "$2a$10$XOzzm0y.T5QU6Reb6TUyUusBodpFNzcHJEYUZ0YikF3bF9h7ZMsdO")).willReturn(false);
     			// then
-    			assertThrows(LoginException.class, () -> memberService.login(new MemberLoginRequestVO(givenEmail, givenPassword)));
+    			assertThrows(LoginException.class, () -> memberService.login(new LoginRequestVO(givenEmail, givenPassword)));
         	}
     	}
     	
@@ -319,9 +319,9 @@ public class MemberServiceTests {
         		final String givenRefreshToken = "refresh";
         		given(jwtUtils.isTokenExpired(givenAccessToken)).willReturn(false);
         		// when
-        		MemberRefreshResponseVO memberRefreshResponseVO = memberService.refresh(new MemberRefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
+        		RefreshResponseVO refreshResponseVO = memberService.refresh(new RefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
         		// then
-        		assertEquals(memberRefreshResponseVO.getToken().getTokenStatus(), TokenStatus.ACCESS_TOKEN_NOT_EXPIRED);
+        		assertEquals(refreshResponseVO.getToken().getTokenStatus(), TokenStatus.ACCESS_TOKEN_NOT_EXPIRED);
         	}
     		@Test
     		@DisplayName("Refresh Token이 만료됨")
@@ -332,9 +332,9 @@ public class MemberServiceTests {
         		given(jwtUtils.isTokenExpired(givenAccessToken)).willReturn(true);
         		given(jwtUtils.isTokenExpired(givenRefreshToken)).willReturn(true);
         		// when
-        		MemberRefreshResponseVO memberRefreshResponseVO = memberService.refresh(new MemberRefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
+        		RefreshResponseVO refreshResponseVO = memberService.refresh(new RefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
         		// then
-        		assertEquals(memberRefreshResponseVO.getToken().getTokenStatus(), TokenStatus.LOGIN_REQUIRED);
+        		assertEquals(refreshResponseVO.getToken().getTokenStatus(), TokenStatus.LOGIN_REQUIRED);
         	}
     		@Test
     		@DisplayName("회원 정보가 정확하지 않음")
@@ -348,9 +348,9 @@ public class MemberServiceTests {
         		given(jwtUtils.isTokenExpired(givenRefreshToken)).willReturn(false);
         		given(memberRepository.findByEmail(givenInvalidEmail)).willReturn(Optional.empty());
         		// when
-        		MemberRefreshResponseVO memberRefreshResponseVO = memberService.refresh(new MemberRefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
+        		RefreshResponseVO refreshResponseVO = memberService.refresh(new RefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
         		// then
-        		assertEquals(memberRefreshResponseVO.getToken().getTokenStatus(), TokenStatus.INVALID);
+        		assertEquals(refreshResponseVO.getToken().getTokenStatus(), TokenStatus.INVALID);
         	}
     		@Test
     		@DisplayName("기존 로그인 정보가 존재하지 않음 - 리프레시 토큰을 찾을 수 없음")
@@ -371,9 +371,9 @@ public class MemberServiceTests {
     			given(memberRepository.findByEmail(givenInvalidEmail)).willReturn(Optional.of(givenMember));
     			given(memberTokenRepository.findByMember(givenMember)).willReturn(Optional.empty());
     			// when
-    			MemberRefreshResponseVO memberRefreshResponseVO = memberService.refresh(new MemberRefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
+    			RefreshResponseVO refreshResponseVO = memberService.refresh(new RefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
     			// then
-    			assertEquals(memberRefreshResponseVO.getToken().getTokenStatus(), TokenStatus.LOGIN_REQUIRED);
+    			assertEquals(refreshResponseVO.getToken().getTokenStatus(), TokenStatus.LOGIN_REQUIRED);
     		}
     		@Test
     		@DisplayName("기존 로그인 정보가 존재하지 않음 - 리프레시 토큰이 같지 않음")
@@ -398,9 +398,9 @@ public class MemberServiceTests {
     					.member(givenMember)
     					.build()));
     			// when
-    			MemberRefreshResponseVO memberRefreshResponseVO = memberService.refresh(new MemberRefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
+    			RefreshResponseVO refreshResponseVO = memberService.refresh(new RefreshRequestVO(TokenVO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build()));
     			// then
-    			assertEquals(memberRefreshResponseVO.getToken().getTokenStatus(), TokenStatus.REFRESH_FAIL);
+    			assertEquals(refreshResponseVO.getToken().getTokenStatus(), TokenStatus.REFRESH_FAIL);
     		}
     	}
     	

@@ -1,24 +1,8 @@
 package com.devh.project.authserver.controller;
 
-import com.devh.project.authserver.exception.DuplicateEmailException;
-import com.devh.project.authserver.exception.LoginException;
-import com.devh.project.authserver.exception.LogoutException;
-import com.devh.project.authserver.exception.PasswordException;
-import com.devh.project.authserver.exception.RefreshException;
-import com.devh.project.authserver.exception.SignUpException;
-import com.devh.project.authserver.service.MemberService;
-import com.devh.project.authserver.vo.MemberLoginRequestVO;
-import com.devh.project.authserver.vo.MemberLoginResponseVO;
-import com.devh.project.authserver.vo.MemberLogoutRequestVO;
-import com.devh.project.authserver.vo.MemberLogoutResponseVO;
-import com.devh.project.authserver.vo.MemberRefreshRequestVO;
-import com.devh.project.authserver.vo.MemberRefreshResponseVO;
-import com.devh.project.authserver.vo.MemberSignUpRequestVO;
-import com.devh.project.authserver.vo.MemberSignUpResponseVO;
-import com.devh.project.common.constant.ApiStatus;
-import com.devh.project.common.vo.ApiResponseVO;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,8 +12,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import com.devh.project.authserver.exception.DuplicateEmailException;
+import com.devh.project.authserver.exception.LoginException;
+import com.devh.project.authserver.exception.LogoutException;
+import com.devh.project.authserver.exception.PasswordException;
+import com.devh.project.authserver.exception.RefreshException;
+import com.devh.project.authserver.exception.SignUpException;
+import com.devh.project.authserver.service.MemberService;
+import com.devh.project.authserver.vo.member.LoginRequestVO;
+import com.devh.project.authserver.vo.member.LoginResponseVO;
+import com.devh.project.authserver.vo.member.LogoutRequestVO;
+import com.devh.project.authserver.vo.member.LogoutResponseVO;
+import com.devh.project.authserver.vo.member.RefreshRequestVO;
+import com.devh.project.authserver.vo.member.RefreshResponseVO;
+import com.devh.project.authserver.vo.member.SignUpRequestVO;
+import com.devh.project.authserver.vo.member.SignUpResponseVO;
+import com.devh.project.common.constant.ApiStatus;
+import com.devh.project.common.vo.ApiResponseVO;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,8 +53,8 @@ public class MemberController {
 	}
 
     @PostMapping("/signup")
-    public ApiResponseVO<MemberSignUpResponseVO> signUp(@Valid @RequestBody MemberSignUpRequestVO memberSignUpRequestVO) throws DuplicateEmailException, PasswordException, SignUpException {
-        return ApiResponseVO.success(ApiStatus.Success.OK, memberService.signUpByMemberSignUpRequestVO(memberSignUpRequestVO));
+    public ApiResponseVO<SignUpResponseVO> signUp(@Valid @RequestBody SignUpRequestVO signUpRequestVO) throws DuplicateEmailException, PasswordException, SignUpException {
+        return ApiResponseVO.success(ApiStatus.Success.OK, memberService.signUpByMemberSignUpRequestVO(signUpRequestVO));
     }
     
     @GetMapping("/signup/complete")
@@ -60,8 +62,8 @@ public class MemberController {
     	ModelAndView mav = new ModelAndView();
     	mav.setViewName("/member/signup-complete.html");
     	try {
-    		MemberSignUpResponseVO memberSignUpResponseVO = memberService.commitSignUpByEmailAndAuthKey(email, authKey);
-			mav.addObject("message", memberSignUpResponseVO.getSignUpStatus().toString());
+    		SignUpResponseVO signUpResponseVO = memberService.commitSignUpByEmailAndAuthKey(email, authKey);
+			mav.addObject("message", signUpResponseVO.getSignUpStatus().toString());
     	} catch (Exception e) {
     		log.error(e.getMessage());
 			mav.addObject("message", e.getMessage());
@@ -70,20 +72,20 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-	public ApiResponseVO<MemberLoginResponseVO> login(@Valid @RequestBody MemberLoginRequestVO memberLoginRequestVO) throws LoginException {
-    	log.info(memberLoginRequestVO.toString());
-    	return ApiResponseVO.success(ApiStatus.Success.OK, memberService.login(memberLoginRequestVO));
+	public ApiResponseVO<LoginResponseVO> login(@Valid @RequestBody LoginRequestVO loginRequestVO) throws LoginException {
+    	log.info(loginRequestVO.toString());
+    	return ApiResponseVO.success(ApiStatus.Success.OK, memberService.login(loginRequestVO));
 	}
 
 	@PostMapping("/logout")
-	public ApiResponseVO<MemberLogoutResponseVO> logout(@Valid @RequestBody MemberLogoutRequestVO memberLogoutRequestVO, HttpServletRequest request) throws LogoutException {
-    	log.info(memberLogoutRequestVO.toString());
-		return ApiResponseVO.success(ApiStatus.Success.OK, memberService.logout(memberLogoutRequestVO, request));
+	public ApiResponseVO<LogoutResponseVO> logout(@Valid @RequestBody LogoutRequestVO logoutRequestVO, HttpServletRequest request) throws LogoutException {
+    	log.info(logoutRequestVO.toString());
+		return ApiResponseVO.success(ApiStatus.Success.OK, memberService.logout(logoutRequestVO, request));
 	}
 	
 	@PostMapping("/refresh")
-	public ApiResponseVO<MemberRefreshResponseVO> refresh(@RequestBody MemberRefreshRequestVO memberRefreshRequestVO) throws RefreshException {
-		log.info(memberRefreshRequestVO.toString());
-		return ApiResponseVO.success(ApiStatus.Success.OK, memberService.refresh(memberRefreshRequestVO));
+	public ApiResponseVO<RefreshResponseVO> refresh(@RequestBody RefreshRequestVO refreshRequestVO) throws RefreshException {
+		log.info(refreshRequestVO.toString());
+		return ApiResponseVO.success(ApiStatus.Success.OK, memberService.refresh(refreshRequestVO));
 	}
 }
