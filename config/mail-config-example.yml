@@ -1,0 +1,13 @@
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: yourmail@a.b
+  password: yourpassowrd
+  smtp:
+    auth: true
+    connectiontimeout: 5000
+    timeout: 5000
+    writetimeout: 5000
+    starttls:
+      enable: true
+      required: true

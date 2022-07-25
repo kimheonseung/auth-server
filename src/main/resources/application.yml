@@ -1,12 +1,6 @@
 server:
   port: 8888
 
-# mail
-# https://victorydntmd.tistory.com/342
-
-# redis
-# https://sabarada.tistory.com/105
-
 jwt:
   issuer: ${jwt.issuer}
   secretKey: ${jwt.secretKey}

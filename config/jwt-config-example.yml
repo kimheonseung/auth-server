@@ -1,0 +1,7 @@
+jwt:
+  issuer: devh
+  secretKey: test
+  header: Authorization
+  expire:
+    access: 10
+    refresh: 60
