@@ -1,4 +1,4 @@
-package com.devh.project.authserver.util;
+package com.devh.project.authserver.helper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class JwtUtils {
+public class JwtHelper {
     @Value("${jwt.issuer}")
     private String issuer;
     @Value("${jwt.secretKey}")

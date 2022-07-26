@@ -1,4 +1,4 @@
-package com.devh.project.authserver.util;
+package com.devh.project.authserver.helper;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -7,10 +7,10 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SecureRandomUtils {
+public class SecureRandomHelper {
 	private final Random random;
 
-	public SecureRandomUtils() throws NoSuchAlgorithmException {
+	public SecureRandomHelper() throws NoSuchAlgorithmException {
 		this.random = SecureRandom.getInstanceStrong();
 	}
 	

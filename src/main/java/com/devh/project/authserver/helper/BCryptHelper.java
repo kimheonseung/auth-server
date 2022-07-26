@@ -1,13 +1,13 @@
-package com.devh.project.authserver.util;
+package com.devh.project.authserver.helper;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BCryptUtils {
+public class BCryptHelper {
 	private final BCryptPasswordEncoder bcryptPasswordEncoder;
 	
-	public BCryptUtils() {
+	public BCryptHelper() {
 		this.bcryptPasswordEncoder = new BCryptPasswordEncoder();
 	}
 	

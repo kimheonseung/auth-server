@@ -1,4 +1,4 @@
-package com.devh.project.authserver.util;
+package com.devh.project.authserver.helper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -39,7 +39,7 @@ import java.security.spec.InvalidParameterSpecException;
  * </pre>
  */
 @Component
-public class AES256Utils {
+public class AES256Helper {
     @Value("${aes.key}")
     private String key;
 

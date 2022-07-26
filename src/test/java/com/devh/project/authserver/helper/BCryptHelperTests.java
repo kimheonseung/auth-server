@@ -1,4 +1,4 @@
-package com.devh.project.authserver.util;
+package com.devh.project.authserver.helper;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -7,17 +7,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.devh.project.authserver.helper.BCryptHelper;
+
 @ExtendWith(MockitoExtension.class)
-public class BCryptUtilsTests {
+public class BCryptHelperTests {
 	@InjectMocks
-	BCryptUtils bcryptUtils;
+	BCryptHelper bcryptHelper;
 	
 	@Test
 	public void encode() {
 		// given
 		final String givenRawString = "test";
 		// when
-		String encodedString = this.bcryptUtils.encode(givenRawString);
+		String encodedString = this.bcryptHelper.encode(givenRawString);
 		// then
 		System.out.println(encodedString);
 	}
@@ -28,7 +30,7 @@ public class BCryptUtilsTests {
 		final String givenRawString = "test";
 		final String givenEncodedString = "$2a$10$XOzzm0y.T5QU6Reb6TUyUusBodpFNzcHJEYUZ0YikF3bF9h7ZMsdO";
 		// when
-		boolean matches = this.bcryptUtils.matches(givenRawString, givenEncodedString);
+		boolean matches = this.bcryptHelper.matches(givenRawString, givenEncodedString);
 		// then
 		assertTrue(matches);
 	}

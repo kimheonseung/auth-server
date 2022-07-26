@@ -1,4 +1,4 @@
-package com.devh.project.authserver.util;
+package com.devh.project.authserver.helper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.devh.project.authserver.helper.AES256Helper;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -19,13 +21,13 @@ import java.security.spec.InvalidParameterSpecException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class AES256UtilsTests {
+public class AES256HelperTests {
     @InjectMocks
-    AES256Utils aes256Utils;
+    AES256Helper aes256Helper;
 
     @BeforeEach
     public void beforeEach() {
-        ReflectionTestUtils.setField(aes256Utils, "key", "devh0000000000000000000000000000");
+        ReflectionTestUtils.setField(aes256Helper, "key", "devh0000000000000000000000000000");
     }
 
     @Test
@@ -33,7 +35,7 @@ public class AES256UtilsTests {
         // given
         final String givenString = "test";
         // when
-        String encryptedString = aes256Utils.encrypt(givenString);
+        String encryptedString = aes256Helper.encrypt(givenString);
         // then
         System.out.println(encryptedString);
     }
@@ -43,7 +45,7 @@ public class AES256UtilsTests {
         // given
         final String givenString = "tMUSeRyXcMH9gaZ7wFGs1aFVVj22NFPbwTZhhFvDXbuLdU+Ym2QoyydNF5M1T7gg";
         // when
-        String decryptedString = aes256Utils.decrypt(givenString);
+        String decryptedString = aes256Helper.decrypt(givenString);
         // then
         assertEquals(decryptedString, "test");
     }
@@ -53,7 +55,7 @@ public class AES256UtilsTests {
         // given
         final String givenString = "21ac82b912eaa161f7a38331409f2760cb82b51f9d3285151fe158ef0dace117LuvDo/pdkFLGF3LvnmCyjg==";
         // when
-        String decryptedString = aes256Utils.decryptByCryptoJS(givenString);
+        String decryptedString = aes256Helper.decryptByCryptoJS(givenString);
         // then
         assertEquals(decryptedString, "test");
     }
