@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,7 +80,7 @@ public class TokenService {
     		final String memberEmail = tokenInvalidateRequestDTO.getEmail();
     		final String tokenEmail = jwtHelper.getEmailFromRequest(httpServletRequest);
     		boolean result = false;
-    		if(memberEmail.equals(tokenEmail)) {
+    		if(StringUtils.equals(memberEmail, tokenEmail)) {
     			Member member = memberRepository.findByEmail(memberEmail).orElseThrow(() -> new NoSuchElementException(memberEmail+" not found."));
     			memberTokenRepository.deleteByMember(member);
     			result = true;
@@ -116,7 +117,7 @@ public class TokenService {
                     	Member member = memberRepository.findByEmail(email).orElseThrow(NoSuchElementException::new);
                         MemberToken memberToken = memberTokenRepository.findByMember(member).orElseThrow(TokenNotFoundException::new);
                         final String recordRefreshToken = memberToken.getRefreshToken();
-                        if(refreshToken.equals(recordRefreshToken)) {
+                        if(StringUtils.equals(refreshToken, recordRefreshToken)) {
                             Token refreshedToken = jwtHelper.generateTokenByEmail(email);
                             tokenRefreshResponseDTO.setToken(Token.buildRefreshSuccess(refreshedToken.getAccessToken(), refreshedToken.getRefreshToken()));
                             memberToken.setRefreshToken(refreshedToken.getRefreshToken());

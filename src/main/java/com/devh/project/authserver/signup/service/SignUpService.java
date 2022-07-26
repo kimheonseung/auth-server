@@ -1,5 +1,6 @@
 package com.devh.project.authserver.signup.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +47,7 @@ public class SignUpService {
     		mailService.sendSignupValidationMail(signUpRequestDTO.getEmail(), redisMember.getAuthKey());
     		/* return sign up response */
     		return SignUpResponseDTO.builder()
-    				.signUpStatus(email.equals(redisMember.getEmail()) ? SignUpStatus.REQUESTED : SignUpStatus.ERROR)
+    				.signUpStatus(StringUtils.equals(email, redisMember.getEmail()) ? SignUpStatus.REQUESTED : SignUpStatus.ERROR)
     				.email(email)
     				.build();
     	} catch (DuplicateEmailException | PasswordException e) {
@@ -63,7 +64,7 @@ public class SignUpService {
         	if(redisMember == null)
         		throw new SignUpException("Failed to sign up ["+email+"]. Maybe time expired.");
         	/* auth key check */
-        	if(!authKey.equals(redisMember.getAuthKey())) 
+        	if(!StringUtils.equals(authKey, redisMember.getAuthKey())) 
         		throw new SignUpException("Invalid Authentication URL.");
         	/* db check */
         	if(memberRepository.existsByEmail(email))
@@ -72,7 +73,7 @@ public class SignUpService {
         	Member member = memberRepository.save(toMember(redisMember));
         	redisMemberRepository.deleteById(email);
         	return SignUpResponseDTO.builder()
-                	.signUpStatus(email.equals(member.getEmail()) ? SignUpStatus.COMPLETED : SignUpStatus.ERROR)
+                	.signUpStatus(StringUtils.equals(email, member.getEmail()) ? SignUpStatus.COMPLETED : SignUpStatus.ERROR)
                 	.email(email)
                 	.build();
     	} catch (Exception e) {
