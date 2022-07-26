@@ -18,7 +18,7 @@ public class MailHelper {
     }
 
     private SimpleMailMessage createSimpleMailMessageByEmailAndAuthKey(String email, String authKey) {
-        final String url = String.format("http://127.0.0.1:8888/member/signup/complete?email=%s&authKey=%s", email, authKey);
+        final String url = String.format("http://127.0.0.1:8888/signup/complete?email=%s&authKey=%s", email, authKey);
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(email);
         simpleMailMessage.setSubject("회원가입 인증 확인 메일입니다.");

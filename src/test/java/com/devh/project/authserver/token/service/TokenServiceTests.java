@@ -1,35 +1,7 @@
 package com.devh.project.authserver.token.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Optional;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.servlet.http.HttpServletRequest;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.devh.project.authserver.domain.Member;
 import com.devh.project.authserver.domain.MemberToken;
-import com.devh.project.authserver.exception.TokenGenerateException;
 import com.devh.project.authserver.helper.AES256Helper;
 import com.devh.project.authserver.helper.AuthKeyHelper;
 import com.devh.project.authserver.helper.BCryptHelper;
@@ -46,6 +18,32 @@ import com.devh.project.authserver.token.dto.TokenInvalidateRequestDTO;
 import com.devh.project.authserver.token.dto.TokenInvalidateResponseDTO;
 import com.devh.project.authserver.token.dto.TokenRefreshRequestDTO;
 import com.devh.project.authserver.token.dto.TokenRefreshResponseDTO;
+import com.devh.project.authserver.token.exception.TokenGenerateException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.servlet.http.HttpServletRequest;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 @Transactional
@@ -74,7 +72,7 @@ public class TokenServiceTests {
     class Success {
         @Test
         @DisplayName("토큰 발급")
-        public void generateToken() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidKeySpecException {
+        public void generateToken() throws Exception {
             // given
             final String givenMemberEmail = "test@test.com";
             final String givenPassword = "tMUSeRyXcMH9gaZ7wFGs1aFVVj22NFPbwTZhhFvDXbuLdU+Ym2QoyydNF5M1T7gg";
@@ -102,7 +100,7 @@ public class TokenServiceTests {
 
         @Test
         @DisplayName("토큰 제거")
-        public void tokenInvalidate() throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
+        public void tokenInvalidate() throws Exception {
             // given
             final String givenEmail = "test@test.com";
             given(jwtHelper.getEmailFromRequest(any(HttpServletRequest.class))).willReturn(givenEmail);
@@ -118,7 +116,7 @@ public class TokenServiceTests {
 
         @Test
         @DisplayName("기존 토큰 만료 - 재발급 로직")
-        public void tokenRefresh() {
+        public void tokenRefresh() throws Exception {
             // given
             final String givenEmail = "test@test.com";
             final String givenAccessToken = "access";
@@ -191,7 +189,7 @@ public class TokenServiceTests {
         class RefreshToken {
             @Test
             @DisplayName("Access Token이 아직 유효함")
-            public void refresh_access_notExpire() {
+            public void refresh_access_notExpire() throws Exception {
                 // given
                 final String givenAccessToken = "access";
                 final String givenRefreshToken = "refresh";
@@ -206,7 +204,7 @@ public class TokenServiceTests {
 
             @Test
             @DisplayName("Refresh Token이 만료됨")
-            public void refresh_refreshExpire() {
+            public void refresh_refreshExpire() throws Exception {
                 // given
                 final String givenAccessToken = "access";
                 final String givenRefreshToken = "refresh";
@@ -222,7 +220,7 @@ public class TokenServiceTests {
 
             @Test
             @DisplayName("회원 정보가 정확하지 않음")
-            public void refresh_invalid() {
+            public void refresh_invalid() throws Exception {
                 // given
                 final String givenInvalidEmail = "invalidEmail@test.com";
                 final String givenAccessToken = "access";
@@ -241,7 +239,7 @@ public class TokenServiceTests {
 
             @Test
             @DisplayName("기존 로그인 정보가 존재하지 않음 - 리프레시 토큰을 찾을 수 없음")
-            public void refresh_refreshNotFound() {
+            public void refresh_refreshNotFound() throws Exception {
                 // given
                 final String givenInvalidEmail = "invalidEmail@test.com";
                 final String givenAccessToken = "access";
@@ -267,7 +265,7 @@ public class TokenServiceTests {
 
             @Test
             @DisplayName("기존 로그인 정보가 존재하지 않음 - 리프레시 토큰이 같지 않음")
-            public void refresh_refreshNotEquals() {
+            public void refresh_refreshNotEquals() throws Exception {
                 // given
                 final String givenInvalidEmail = "invalidEmail@test.com";
                 final String givenAccessToken = "access";

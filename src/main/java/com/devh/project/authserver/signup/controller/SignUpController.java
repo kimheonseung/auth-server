@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.devh.project.authserver.exception.DuplicateEmailException;
-import com.devh.project.authserver.exception.PasswordException;
-import com.devh.project.authserver.exception.SignUpException;
+import com.devh.project.authserver.signup.exception.DuplicateEmailException;
+import com.devh.project.authserver.signup.exception.PasswordException;
+import com.devh.project.authserver.signup.exception.SignUpException;
 import com.devh.project.authserver.signup.dto.SignUpRequestDTO;
 import com.devh.project.authserver.signup.dto.SignUpResponseDTO;
 import com.devh.project.authserver.signup.service.SignUpService;
@@ -43,21 +43,16 @@ public class SignUpController {
 	}
 
     @PostMapping
-    public ApiResponseDTO<SignUpResponseDTO> signUp(@Valid @RequestBody SignUpRequestDTO signUpRequestDTO) throws DuplicateEmailException, PasswordException, SignUpException {
+    public ApiResponseDTO<SignUpResponseDTO> signUp(@Valid @RequestBody SignUpRequestDTO signUpRequestDTO) throws Exception {
         return ApiResponseDTO.success(ApiStatus.Success.OK, signUpService.signUpByMemberSignUpRequestVO(signUpRequestDTO));
     }
     
     @GetMapping("/complete")
-    public ModelAndView signUpComplete(@RequestParam(name = "email") String email, @RequestParam(name = "authKey") String authKey) {
-    	ModelAndView mav = new ModelAndView();
-    	mav.setViewName("/member/signup-complete.html");
-    	try {
-    		SignUpResponseDTO signUpResponseDTO = signUpService.commitSignUpByEmailAndAuthKey(email, authKey);
-			mav.addObject("message", signUpResponseDTO.getSignUpStatus().toString());
-    	} catch (Exception e) {
-    		log.error(e.getMessage());
-			mav.addObject("message", e.getMessage());
-		}
+    public ModelAndView signUpComplete(@RequestParam(name = "email") String email, @RequestParam(name = "authKey") String authKey) throws Exception {
+		SignUpResponseDTO signUpResponseDTO = signUpService.commitSignUpByEmailAndAuthKey(email, authKey);
+		ModelAndView mav = new ModelAndView();
+		mav.setViewName("/signup-complete.html");
+    	mav.addObject("message", signUpResponseDTO.getSignUpStatus().toString());
     	return mav;
     }
 }

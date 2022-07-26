@@ -15,7 +15,7 @@ const key = "[[${aesKey}]]";
 document.addEventListener("DOMContentLoaded", (evt) => {
   document.getElementById('btn_signup').addEventListener('click', () => {
     axios
-        .post('/member/signup', {
+        .post('/signup', {
           email: document.getElementById('email').value,
           name: document.getElementById('name').value,
           password: aes256Service().encrypt(document.getElementById('password').value)

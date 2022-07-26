@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.devh.project.authserver.domain.Member;
 import com.devh.project.authserver.domain.MemberToken;
-import com.devh.project.authserver.exception.PasswordException;
-import com.devh.project.authserver.exception.TokenGenerateException;
-import com.devh.project.authserver.exception.TokenInvalidateException;
-import com.devh.project.authserver.exception.TokenNotFoundException;
-import com.devh.project.authserver.exception.TokenRefreshException;
+import com.devh.project.authserver.signup.exception.PasswordException;
+import com.devh.project.authserver.token.exception.TokenGenerateException;
+import com.devh.project.authserver.token.exception.TokenInvalidateException;
+import com.devh.project.authserver.token.exception.TokenNotFoundException;
+import com.devh.project.authserver.token.exception.TokenRefreshException;
 import com.devh.project.authserver.helper.AES256Helper;
 import com.devh.project.authserver.helper.BCryptHelper;
 import com.devh.project.authserver.helper.JwtHelper;
@@ -44,22 +44,14 @@ public class TokenService {
     private final JwtHelper jwtHelper;
     private final BCryptHelper bcryptHelper;
 
-    public TokenGenerateResponseDTO generateToken(TokenGenerateRequestDTO tokenGenerateRequestDTO) throws TokenGenerateException {
-
-    	try {
-    		final String email = tokenGenerateRequestDTO.getEmail();
-    		String password = tokenGenerateRequestDTO.getPassword();
-			Token token;
-			password = aes256Helper.decrypt(password);
-			/* member check */
-			Member member = memberRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(email + " does not exists."));
-			if(bcryptHelper.matches(password, member.getPassword())) {
-				/* generate token */
-				token = jwtHelper.generateTokenByEmail(email);
-			} else {
-				throw new PasswordException("password not matches");
-			}
-
+    public TokenGenerateResponseDTO generateToken(TokenGenerateRequestDTO tokenGenerateRequestDTO) throws Exception {
+		final String email = tokenGenerateRequestDTO.getEmail();
+		final String password = aes256Helper.decrypt(tokenGenerateRequestDTO.getPassword());
+		/* member check */
+		Member member = memberRepository.findByEmail(email).orElseThrow(() -> new TokenGenerateException(email + " does not exists."));
+		/* generate token */
+		if(bcryptHelper.matches(password, member.getPassword())) {
+			Token token = jwtHelper.generateTokenByEmail(email);
 			/* check member token */
 			MemberToken memberToken = memberTokenRepository.findByMember(member).orElse(MemberToken.builder()
 					.member(member)
@@ -69,77 +61,65 @@ public class TokenService {
 			return TokenGenerateResponseDTO.builder()
 					.token(token)
 					.build();
-		} catch (Exception e) {
-    		log.error(e.getMessage());
-    		throw new TokenGenerateException(e.getMessage());
-		}
+		} else
+			throw new TokenGenerateException("password not matches");
 	}
 
-	public TokenInvalidateResponseDTO invalidateToken(TokenInvalidateRequestDTO tokenInvalidateRequestDTO, HttpServletRequest httpServletRequest) throws TokenInvalidateException {
-    	try {
-    		final String memberEmail = tokenInvalidateRequestDTO.getEmail();
-    		final String tokenEmail = jwtHelper.getEmailFromRequest(httpServletRequest);
-    		boolean result = false;
-    		if(StringUtils.equals(memberEmail, tokenEmail)) {
-    			Member member = memberRepository.findByEmail(memberEmail).orElseThrow(() -> new NoSuchElementException(memberEmail+" not found."));
-    			memberTokenRepository.deleteByMember(member);
-    			result = true;
+	public TokenInvalidateResponseDTO invalidateToken(TokenInvalidateRequestDTO tokenInvalidateRequestDTO, HttpServletRequest httpServletRequest) throws Exception {
+		final String memberEmail = tokenInvalidateRequestDTO.getEmail();
+		final String tokenEmail = jwtHelper.getEmailFromRequest(httpServletRequest);
+		if(StringUtils.equals(memberEmail, tokenEmail)) {
+			Member member = memberRepository.findByEmail(memberEmail).orElseThrow(() -> new TokenInvalidateException(memberEmail+" not found."));
+			memberTokenRepository.deleteByMember(member);
+			return TokenInvalidateResponseDTO.builder()
+					.result(true)
+					.build();
+		} else
+			throw new TokenInvalidateException("token information is invalid.");
+
+	}
+
+	// jwtUtils 개선 필요
+	public TokenRefreshResponseDTO refreshToken(TokenRefreshRequestDTO tokenRefreshRequestDTO) throws Exception {
+		final Token requestToken = tokenRefreshRequestDTO.getToken();
+		final String accessToken = requestToken.getAccessToken();
+		final String refreshToken = requestToken.getRefreshToken();
+		final TokenRefreshResponseDTO tokenRefreshResponseDTO = TokenRefreshResponseDTO.builder().build();
+
+		if(jwtHelper.isTokenExpired(accessToken)) {
+			String email;
+			try {
+				email = jwtHelper.getEmailFromToken(accessToken);
+			} catch (ExpiredJwtException e) {
+				email = e.getClaims().getSubject();
 			}
 
-    		return TokenInvalidateResponseDTO.builder()
-    				.result(result)
-    				.build();
-		} catch (Exception e) {
-    		log.error(e.getMessage());
-    		throw new TokenInvalidateException(e.getMessage());
-		}
-	}
-	
-	public TokenRefreshResponseDTO refreshToken(TokenRefreshRequestDTO tokenRefreshRequestDTO) throws TokenRefreshException {
-		try {
-			final Token requestToken = tokenRefreshRequestDTO.getToken();
-			final String accessToken = requestToken.getAccessToken();
-			final String refreshToken = requestToken.getRefreshToken();
-			final TokenRefreshResponseDTO tokenRefreshResponseDTO = TokenRefreshResponseDTO.builder().build();
-			
-			if(jwtHelper.isTokenExpired(accessToken)) {
-				String email = null;
-				try {
-	                email = jwtHelper.getEmailFromToken(accessToken);
-	            } catch (ExpiredJwtException e) {
-	                email = e.getClaims().getSubject();
-	            }
-				
-                try {
-                    if(jwtHelper.isTokenExpired(refreshToken)) {
-                    	tokenRefreshResponseDTO.setToken(Token.buildLoginRequired());
-                    } else {
-                    	Member member = memberRepository.findByEmail(email).orElseThrow(NoSuchElementException::new);
-                        MemberToken memberToken = memberTokenRepository.findByMember(member).orElseThrow(TokenNotFoundException::new);
-                        final String recordRefreshToken = memberToken.getRefreshToken();
-                        if(StringUtils.equals(refreshToken, recordRefreshToken)) {
-                            Token refreshedToken = jwtHelper.generateTokenByEmail(email);
-                            tokenRefreshResponseDTO.setToken(Token.buildRefreshSuccess(refreshedToken.getAccessToken(), refreshedToken.getRefreshToken()));
-                            memberToken.setRefreshToken(refreshedToken.getRefreshToken());
-                            memberTokenRepository.save(memberToken);
-                        } else {
-                        	tokenRefreshResponseDTO.setToken(Token.buildRefreshFail());
-                        }
-                    }
-                } catch (ExpiredJwtException | TokenNotFoundException e) {
-                	tokenRefreshResponseDTO.setToken(Token.buildLoginRequired());
-                } catch (NoSuchElementException e) {
-                	tokenRefreshResponseDTO.setToken(Token.buildInvalid());
+			try {
+				if(jwtHelper.isTokenExpired(refreshToken)) {
+					tokenRefreshResponseDTO.setToken(Token.buildLoginRequired());
+				} else {
+					Member member = memberRepository.findByEmail(email).orElseThrow(NoSuchElementException::new);
+					MemberToken memberToken = memberTokenRepository.findByMember(member).orElseThrow(TokenNotFoundException::new);
+					final String recordRefreshToken = memberToken.getRefreshToken();
+					if(StringUtils.equals(refreshToken, recordRefreshToken)) {
+						Token refreshedToken = jwtHelper.generateTokenByEmail(email);
+						tokenRefreshResponseDTO.setToken(Token.buildRefreshSuccess(refreshedToken.getAccessToken(), refreshedToken.getRefreshToken()));
+						memberToken.setRefreshToken(refreshedToken.getRefreshToken());
+						memberTokenRepository.save(memberToken);
+					} else {
+						tokenRefreshResponseDTO.setToken(Token.buildRefreshFail());
+					}
 				}
-            } else {
-            	tokenRefreshResponseDTO.setToken(Token.buildAccessTokenNotExpired(accessToken, refreshToken));
-            }
-			
-			return tokenRefreshResponseDTO;
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			throw new TokenRefreshException(e.getMessage());
+			} catch (ExpiredJwtException | TokenNotFoundException e) {
+				tokenRefreshResponseDTO.setToken(Token.buildLoginRequired());
+			} catch (NoSuchElementException e) {
+				tokenRefreshResponseDTO.setToken(Token.buildInvalid());
+			}
+		} else {
+			tokenRefreshResponseDTO.setToken(Token.buildAccessTokenNotExpired(accessToken, refreshToken));
 		}
+
+		return tokenRefreshResponseDTO;
 	}
     
 }

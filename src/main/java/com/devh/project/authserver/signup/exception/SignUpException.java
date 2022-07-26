@@ -1,4 +1,4 @@
-package com.devh.project.authserver.exception;
+package com.devh.project.authserver.signup.exception;
 
 public class SignUpException extends IllegalStateException {
 	private static final long serialVersionUID = -7165186682626588013L;

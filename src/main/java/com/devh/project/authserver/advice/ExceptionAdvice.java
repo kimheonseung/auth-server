@@ -1,7 +1,5 @@
 package com.devh.project.authserver.advice;
 
-import com.devh.project.authserver.exception.DuplicateEmailException;
-import com.devh.project.authserver.exception.PasswordException;
 import com.devh.project.common.constant.ApiStatus;
 import com.devh.project.common.dto.ApiResponseDTO;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,13 +24,5 @@ public class ExceptionAdvice {
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public <T> ApiResponseDTO<T> handleMethodArgumentNotValidException(Exception e) {
         return ApiResponseDTO.customError(ApiStatus.CustomError.VALIDATION_ERROR, e.getMessage());
-    }
-    @ExceptionHandler({DuplicateEmailException.class})
-    public <T> ApiResponseDTO<T> handleDuplicateEmailException(Exception e) {
-        return ApiResponseDTO.customError(ApiStatus.CustomError.DUPLICATE_EMAIL_ERROR, e.getMessage());
-    }
-    @ExceptionHandler({PasswordException.class})
-    public <T> ApiResponseDTO<T> handlePasswordExceptionException(Exception e) {
-        return ApiResponseDTO.customError(ApiStatus.CustomError.PASSWORD_ERROR, e.getMessage());
     }
 }

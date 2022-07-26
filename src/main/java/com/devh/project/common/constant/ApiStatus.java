@@ -53,7 +53,12 @@ public class ApiStatus {
     public enum CustomError {
         VALIDATION_ERROR("Validation Error", 800, "Invalid value."),
         DUPLICATE_EMAIL_ERROR("Duplicate Email Error", 801, "email duplicated"),
-        PASSWORD_ERROR("Password Error", 802, "Something wrong with password value.")
+        PASSWORD_ERROR("Password Error", 801, "Something wrong with password value."),
+        SIGNUP_ERROR("SignUp Error", 801, "Sign up failed."),
+        TOKEN_ERROR("Token Error", 802, "Something wrong with your token."),
+        TOKEN_GENERATE_ERROR("Token Generate Error", 802, "Token generate failed."),
+        TOKEN_INVALIDATE_ERROR("Token Invalidate Error", 802, "Token invalidate failed."),
+        TOKEN_REFRESH_ERROR("Token Refresh Error", 802, "Token refresh failed."),
         ;
 
         private final String status;

@@ -1,14 +1,19 @@
 package com.devh.project.authserver.signup.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-
-import java.security.InvalidKeyException;
-import java.util.Optional;
-
+import com.devh.project.authserver.domain.Member;
+import com.devh.project.authserver.domain.RedisMember;
+import com.devh.project.authserver.signup.exception.DuplicateEmailException;
+import com.devh.project.authserver.signup.exception.PasswordException;
+import com.devh.project.authserver.signup.exception.SignUpException;
+import com.devh.project.authserver.helper.AES256Helper;
+import com.devh.project.authserver.helper.AuthKeyHelper;
+import com.devh.project.authserver.helper.BCryptHelper;
+import com.devh.project.authserver.helper.MailHelper;
+import com.devh.project.authserver.repository.MemberRepository;
+import com.devh.project.authserver.repository.RedisMemberRepository;
+import com.devh.project.authserver.signup.SignUpStatus;
+import com.devh.project.authserver.signup.dto.SignUpRequestDTO;
+import com.devh.project.authserver.signup.dto.SignUpResponseDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,22 +23,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.devh.project.authserver.domain.Member;
-import com.devh.project.authserver.domain.RedisMember;
-import com.devh.project.authserver.exception.DuplicateEmailException;
-import com.devh.project.authserver.exception.PasswordException;
-import com.devh.project.authserver.exception.SignUpException;
-import com.devh.project.authserver.helper.AES256Helper;
-import com.devh.project.authserver.helper.AuthKeyHelper;
-import com.devh.project.authserver.helper.BCryptHelper;
-import com.devh.project.authserver.helper.JwtHelper;
-import com.devh.project.authserver.helper.MailHelper;
-import com.devh.project.authserver.repository.MemberRepository;
-import com.devh.project.authserver.repository.MemberTokenRepository;
-import com.devh.project.authserver.repository.RedisMemberRepository;
-import com.devh.project.authserver.signup.SignUpStatus;
-import com.devh.project.authserver.signup.dto.SignUpRequestDTO;
-import com.devh.project.authserver.signup.dto.SignUpResponseDTO;
+import java.security.InvalidKeyException;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(MockitoExtension.class)
 @Transactional
@@ -41,11 +38,7 @@ public class SignUpServiceTests {
     @Mock
     private MemberRepository memberRepository;
     @Mock
-    private MemberTokenRepository memberTokenRepository;
-    @Mock
     private RedisMemberRepository redisMemberRepository;
-    @Mock
-    private JwtHelper jwtHelper;
     @Mock
     private BCryptHelper bcryptHelper;
     @Mock
