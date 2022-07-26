@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.devh.project.authserver.constant.TokenStatus;
-import com.devh.project.authserver.dto.TokenDTO;
+import com.devh.project.authserver.token.Token;
+import com.devh.project.authserver.token.TokenStatus;
 import com.devh.project.common.util.ExceptionUtils;
 
 import io.jsonwebtoken.Claims;
@@ -47,7 +47,7 @@ public class JwtHelper {
         return claims.getSubject();
     }
 
-    public TokenDTO generateTokenByEmail(String email) {
+    public Token generateTokenByEmail(String email) {
         final Date now = new Date();
         final String accessToken = Jwts.builder()
                 .setIssuer(issuer)
@@ -61,7 +61,7 @@ public class JwtHelper {
                 .setExpiration(generateRefreshExpirationDate())
                 .signWith(SIGNATURE_ALGORITHM, secretKey.getBytes(StandardCharsets.UTF_8))
                 .compact();
-        return TokenDTO.builder()
+        return Token.builder()
                 .tokenStatus(TokenStatus.LOGIN_SUCCESS)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
