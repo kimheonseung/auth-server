@@ -129,7 +129,7 @@ public class TokenServiceTests {
                     .name("test")
                     .password("$2a$10$XOzzm0y.T5QU6Reb6TUyUusBodpFNzcHJEYUZ0YikF3bF9h7ZMsdO")
                     .build();
-            final Token tokenDTO = Token.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build();
+            final Token token = Token.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build();
             given(jwtHelper.isTokenExpired(givenAccessToken)).willReturn(true);
             given(jwtHelper.isTokenExpired(givenRefreshToken)).willReturn(false);
             given(jwtHelper.getEmailFromToken(givenAccessToken)).willReturn(givenEmail);
@@ -141,7 +141,7 @@ public class TokenServiceTests {
                     .refreshToken(givenRefreshToken)
                     .build()));
             // when
-            TokenRefreshResponseDTO tokenRefreshResponseDTO = tokenService.refreshToken(TokenRefreshRequestDTO.builder().token(tokenDTO).build());
+            TokenRefreshResponseDTO tokenRefreshResponseDTO = tokenService.refreshToken(TokenRefreshRequestDTO.builder().token(token).build());
             // then
             assertEquals(tokenRefreshResponseDTO.getToken().getTokenStatus(), TokenStatus.REFRESH_SUCCESS);
             assertEquals(tokenRefreshResponseDTO.getToken().getAccessToken(), "newAccess");

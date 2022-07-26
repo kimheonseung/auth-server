@@ -49,13 +49,13 @@ public class TokenService {
     	try {
     		final String email = tokenGenerateRequestDTO.getEmail();
     		String password = tokenGenerateRequestDTO.getPassword();
-			Token tokenDTO;
+			Token token;
 			password = aes256Helper.decrypt(password);
 			/* member check */
 			Member member = memberRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(email + " does not exists."));
 			if(bcryptHelper.matches(password, member.getPassword())) {
 				/* generate token */
-				tokenDTO = jwtHelper.generateTokenByEmail(email);
+				token = jwtHelper.generateTokenByEmail(email);
 			} else {
 				throw new PasswordException("password not matches");
 			}
@@ -64,10 +64,10 @@ public class TokenService {
 			MemberToken memberToken = memberTokenRepository.findByMember(member).orElse(MemberToken.builder()
 					.member(member)
 					.build());
-			memberToken.setRefreshToken(tokenDTO.getRefreshToken());
+			memberToken.setRefreshToken(token.getRefreshToken());
 			memberTokenRepository.save(memberToken);
 			return TokenGenerateResponseDTO.builder()
-					.token(tokenDTO)
+					.token(token)
 					.build();
 		} catch (Exception e) {
     		log.error(e.getMessage());
