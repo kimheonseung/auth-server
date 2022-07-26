@@ -9,18 +9,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.devh.project.authserver.domain.Member;
 import com.devh.project.authserver.domain.MemberToken;
+import com.devh.project.authserver.exception.PasswordException;
 import com.devh.project.authserver.exception.TokenGenerateException;
 import com.devh.project.authserver.exception.TokenInvalidateException;
-import com.devh.project.authserver.exception.PasswordException;
-import com.devh.project.authserver.exception.TokenRefreshException;
 import com.devh.project.authserver.exception.TokenNotFoundException;
+import com.devh.project.authserver.exception.TokenRefreshException;
 import com.devh.project.authserver.helper.AES256Helper;
 import com.devh.project.authserver.helper.BCryptHelper;
 import com.devh.project.authserver.helper.JwtHelper;
 import com.devh.project.authserver.repository.MemberRepository;
 import com.devh.project.authserver.repository.MemberTokenRepository;
 import com.devh.project.authserver.token.Token;
-import com.devh.project.authserver.token.TokenStatus;
 import com.devh.project.authserver.token.dto.TokenGenerateRequestDTO;
 import com.devh.project.authserver.token.dto.TokenGenerateResponseDTO;
 import com.devh.project.authserver.token.dto.TokenInvalidateRequestDTO;
@@ -100,59 +99,42 @@ public class TokenService {
 			final Token requestToken = tokenRefreshRequestDTO.getToken();
 			final String accessToken = requestToken.getAccessToken();
 			final String refreshToken = requestToken.getRefreshToken();
+			final TokenRefreshResponseDTO tokenRefreshResponseDTO = TokenRefreshResponseDTO.builder().build();
 			
-			boolean isAccessTokenExpired = false;
-			String email = null;
-			
-			try {
-                isAccessTokenExpired = jwtHelper.isTokenExpired(accessToken);
-                if(isAccessTokenExpired) {
-                	email = jwtHelper.getEmailFromToken(accessToken);
-                } else {
-                	requestToken.setTokenStatus(TokenStatus.ACCESS_TOKEN_NOT_EXPIRED);
-                }
-            } catch (ExpiredJwtException e) {
-                email = e.getClaims().getSubject();
-                isAccessTokenExpired = true;
-            }
-			
-			if(isAccessTokenExpired) {
+			if(jwtHelper.isTokenExpired(accessToken)) {
+				String email = null;
+				try {
+	                email = jwtHelper.getEmailFromToken(accessToken);
+	            } catch (ExpiredJwtException e) {
+	                email = e.getClaims().getSubject();
+	            }
+				
                 try {
-                    if(!jwtHelper.isTokenExpired(refreshToken)) {
-                        Member member = memberRepository.findByEmail(email).orElseThrow(NoSuchElementException::new);
+                    if(jwtHelper.isTokenExpired(refreshToken)) {
+                    	tokenRefreshResponseDTO.setToken(Token.buildLoginRequired());
+                    } else {
+                    	Member member = memberRepository.findByEmail(email).orElseThrow(NoSuchElementException::new);
                         MemberToken memberToken = memberTokenRepository.findByMember(member).orElseThrow(TokenNotFoundException::new);
                         final String recordRefreshToken = memberToken.getRefreshToken();
                         if(refreshToken.equals(recordRefreshToken)) {
-                            Token refreshTokenDTO = jwtHelper.generateTokenByEmail(email);
-                            requestToken.setTokenStatus(TokenStatus.REFRESH_SUCCESS);
-                            requestToken.setAccessToken(refreshTokenDTO.getAccessToken());
-                            requestToken.setRefreshToken(refreshTokenDTO.getRefreshToken());
-                            memberToken.setRefreshToken(refreshTokenDTO.getRefreshToken());
+                            Token refreshedToken = jwtHelper.generateTokenByEmail(email);
+                            tokenRefreshResponseDTO.setToken(Token.buildRefreshSuccess(refreshedToken.getAccessToken(), refreshedToken.getRefreshToken()));
+                            memberToken.setRefreshToken(refreshedToken.getRefreshToken());
                             memberTokenRepository.save(memberToken);
                         } else {
-                        	requestToken.setTokenStatus(TokenStatus.REFRESH_FAIL);
-                        	requestToken.setAccessToken(null);
-                        	requestToken.setRefreshToken(null);
+                        	tokenRefreshResponseDTO.setToken(Token.buildRefreshFail());
                         }
-                    } else {
-                    	requestToken.setTokenStatus(TokenStatus.LOGIN_REQUIRED);
-                    	requestToken.setAccessToken(null);
-                    	requestToken.setRefreshToken(null);
                     }
                 } catch (ExpiredJwtException | TokenNotFoundException e) {
-                	requestToken.setTokenStatus(TokenStatus.LOGIN_REQUIRED);
-                	requestToken.setAccessToken(null);
-                	requestToken.setRefreshToken(null);
+                	tokenRefreshResponseDTO.setToken(Token.buildLoginRequired());
                 } catch (NoSuchElementException e) {
-					requestToken.setTokenStatus(TokenStatus.INVALID);
-					requestToken.setAccessToken(null);
-                	requestToken.setRefreshToken(null);
+                	tokenRefreshResponseDTO.setToken(Token.buildInvalid());
 				}
+            } else {
+            	tokenRefreshResponseDTO.setToken(Token.buildAccessTokenNotExpired(accessToken, refreshToken));
             }
 			
-			return TokenRefreshResponseDTO.builder()
-					.token(requestToken)
-					.build();
+			return tokenRefreshResponseDTO;
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			throw new TokenRefreshException(e.getMessage());
