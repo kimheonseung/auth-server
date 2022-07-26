@@ -48,7 +48,7 @@ import com.devh.project.authserver.repository.RedisMemberRepository;
 
 @ExtendWith(MockitoExtension.class)
 @Transactional
-public class MemberTokenServiceTests {
+public class TokenServiceTests {
     @Mock
     private MemberRepository memberRepository;
     @Mock
@@ -66,7 +66,7 @@ public class MemberTokenServiceTests {
     @Mock
     private MailService mailService;
     @InjectMocks
-    private MemberTokenService memberService;
+    private TokenService memberService;
 
     @Nested
     @DisplayName("성공")
@@ -92,7 +92,7 @@ public class MemberTokenServiceTests {
                     .refreshToken(givenRefreshToken)
                     .build());
             // when
-            LoginResponseDTO loginResponseDTO = memberService.login(LoginRequestDTO.builder().email(givenMemberEmail).password(givenPassword).build());
+            LoginResponseDTO loginResponseDTO = memberService.generateToken(LoginRequestDTO.builder().email(givenMemberEmail).password(givenPassword).build());
             // then
             assertEquals(loginResponseDTO.getToken().getTokenStatus(), TokenStatus.LOGIN_SUCCESS);
             assertEquals(loginResponseDTO.getToken().getAccessToken(), givenAccessToken);
@@ -111,7 +111,7 @@ public class MemberTokenServiceTests {
                     .password("$2a$10$XOzzm0y.T5QU6Reb6TUyUusBodpFNzcHJEYUZ0YikF3bF9h7ZMsdO")
                     .build()));
             // when
-            LogoutResponseDTO response = memberService.logout(LogoutRequestDTO.builder().email(givenEmail).build(), new MockHttpServletRequest());
+            LogoutResponseDTO response = memberService.invalidateToken(LogoutRequestDTO.builder().email(givenEmail).build(), new MockHttpServletRequest());
             System.out.println(response);
         }
 
@@ -140,7 +140,7 @@ public class MemberTokenServiceTests {
                     .refreshToken(givenRefreshToken)
                     .build()));
             // when
-            RefreshResponseDTO refreshResponseDTO = memberService.refresh(RefreshRequestDTO.builder().token(tokenDTO).build());
+            RefreshResponseDTO refreshResponseDTO = memberService.refreshToken(RefreshRequestDTO.builder().token(tokenDTO).build());
             // then
             assertEquals(refreshResponseDTO.getToken().getTokenStatus(), TokenStatus.REFRESH_SUCCESS);
             assertEquals(refreshResponseDTO.getToken().getAccessToken(), "newAccess");
@@ -163,7 +163,7 @@ public class MemberTokenServiceTests {
                 given(aes256Helper.decrypt(givenPassword)).willReturn("test");
                 given(memberRepository.findByEmail(givenEmail)).willReturn(Optional.empty());
                 // then
-                assertThrows(LoginException.class, () -> memberService.login(LoginRequestDTO.builder().email(givenEmail).password(givenPassword).build()));
+                assertThrows(LoginException.class, () -> memberService.generateToken(LoginRequestDTO.builder().email(givenEmail).password(givenPassword).build()));
             }
 
             @Test
@@ -181,7 +181,7 @@ public class MemberTokenServiceTests {
                         .build()));
                 given(bcryptHelper.matches("test", "$2a$10$XOzzm0y.T5QU6Reb6TUyUusBodpFNzcHJEYUZ0YikF3bF9h7ZMsdO")).willReturn(false);
                 // then
-                assertThrows(LoginException.class, () -> memberService.login(LoginRequestDTO.builder().email(givenEmail).password(givenPassword).build()));
+                assertThrows(LoginException.class, () -> memberService.generateToken(LoginRequestDTO.builder().email(givenEmail).password(givenPassword).build()));
             }
         }
 
@@ -196,7 +196,7 @@ public class MemberTokenServiceTests {
                 final String givenRefreshToken = "refresh";
                 given(jwtHelper.isTokenExpired(givenAccessToken)).willReturn(false);
                 // when
-                RefreshResponseDTO refreshResponseDTO = memberService.refresh(RefreshRequestDTO.builder()
+                RefreshResponseDTO refreshResponseDTO = memberService.refreshToken(RefreshRequestDTO.builder()
                         .token(TokenDTO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build())
                         .build());
                 // then
@@ -212,7 +212,7 @@ public class MemberTokenServiceTests {
                 given(jwtHelper.isTokenExpired(givenAccessToken)).willReturn(true);
                 given(jwtHelper.isTokenExpired(givenRefreshToken)).willReturn(true);
                 // when
-                RefreshResponseDTO refreshResponseDTO = memberService.refresh(RefreshRequestDTO.builder()
+                RefreshResponseDTO refreshResponseDTO = memberService.refreshToken(RefreshRequestDTO.builder()
                         .token(TokenDTO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build())
                         .build());
                 // then
@@ -231,7 +231,7 @@ public class MemberTokenServiceTests {
                 given(jwtHelper.isTokenExpired(givenRefreshToken)).willReturn(false);
                 given(memberRepository.findByEmail(givenInvalidEmail)).willReturn(Optional.empty());
                 // when
-                RefreshResponseDTO refreshResponseDTO = memberService.refresh(RefreshRequestDTO.builder()
+                RefreshResponseDTO refreshResponseDTO = memberService.refreshToken(RefreshRequestDTO.builder()
                         .token(TokenDTO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build())
                         .build());
                 // then
@@ -257,7 +257,7 @@ public class MemberTokenServiceTests {
                 given(memberRepository.findByEmail(givenInvalidEmail)).willReturn(Optional.of(givenMember));
                 given(memberTokenRepository.findByMember(givenMember)).willReturn(Optional.empty());
                 // when
-                RefreshResponseDTO refreshResponseDTO = memberService.refresh(RefreshRequestDTO.builder()
+                RefreshResponseDTO refreshResponseDTO = memberService.refreshToken(RefreshRequestDTO.builder()
                         .token(TokenDTO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build())
                         .build());
                 // then
@@ -287,7 +287,7 @@ public class MemberTokenServiceTests {
                         .member(givenMember)
                         .build()));
                 // when
-                RefreshResponseDTO refreshResponseDTO = memberService.refresh(RefreshRequestDTO.builder()
+                RefreshResponseDTO refreshResponseDTO = memberService.refreshToken(RefreshRequestDTO.builder()
                         .token(TokenDTO.builder().accessToken(givenAccessToken).refreshToken(givenRefreshToken).build())
                         .build());
                 // then

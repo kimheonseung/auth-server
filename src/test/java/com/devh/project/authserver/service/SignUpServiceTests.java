@@ -36,7 +36,7 @@ import com.devh.project.authserver.repository.RedisMemberRepository;
 
 @ExtendWith(MockitoExtension.class)
 @Transactional
-public class MemberSignUpServiceTests {
+public class SignUpServiceTests {
     @Mock
     private MemberRepository memberRepository;
     @Mock
@@ -54,7 +54,7 @@ public class MemberSignUpServiceTests {
     @Mock
     private MailService mailService;
     @InjectMocks
-    private MemberSignUpService memberSignUpService;
+    private SignUpService memberSignUpService;
 
     @Nested
     @DisplayName("성공")

@@ -1,18 +1,15 @@
 package com.devh.project.authserver.helper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.security.NoSuchAlgorithmException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import com.devh.project.authserver.helper.AuthKeyHelper;
-import com.devh.project.authserver.helper.SecureRandomHelper;
-
-import java.security.NoSuchAlgorithmException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthKeyHelperTests {

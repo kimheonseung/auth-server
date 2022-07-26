@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
-public class MemberTokenService {
+public class TokenService {
 
     private final AES256Helper aes256Helper;
     private final MemberRepository memberRepository;
@@ -44,7 +44,7 @@ public class MemberTokenService {
     private final JwtHelper jwtHelper;
     private final BCryptHelper bcryptHelper;
 
-    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) throws LoginException {
+    public LoginResponseDTO generateToken(LoginRequestDTO loginRequestDTO) throws LoginException {
 
     	try {
     		final String email = loginRequestDTO.getEmail();
@@ -75,7 +75,7 @@ public class MemberTokenService {
 		}
 	}
 
-	public LogoutResponseDTO logout(LogoutRequestDTO logoutRequestDTO, HttpServletRequest httpServletRequest) throws LogoutException {
+	public LogoutResponseDTO invalidateToken(LogoutRequestDTO logoutRequestDTO, HttpServletRequest httpServletRequest) throws LogoutException {
     	try {
     		final String memberEmail = logoutRequestDTO.getEmail();
     		final String tokenEmail = jwtHelper.getEmailFromRequest(httpServletRequest);
@@ -95,7 +95,7 @@ public class MemberTokenService {
 		}
 	}
 	
-	public RefreshResponseDTO refresh(RefreshRequestDTO refreshRequestDTO) throws RefreshException {
+	public RefreshResponseDTO refreshToken(RefreshRequestDTO refreshRequestDTO) throws RefreshException {
 		try {
 			final TokenDTO requestToken = refreshRequestDTO.getToken();
 			final String accessToken = requestToken.getAccessToken();

@@ -7,8 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.devh.project.authserver.helper.SecureRandomHelper;
-
 @ExtendWith(MockitoExtension.class)
 public class SecureRandomHelperTests {
 	@InjectMocks

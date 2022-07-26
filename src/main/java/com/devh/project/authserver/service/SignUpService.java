@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
-public class MemberSignUpService {
+public class SignUpService {
 
     private final AES256Helper aes256Helper;
     private final MemberRepository memberRepository;
