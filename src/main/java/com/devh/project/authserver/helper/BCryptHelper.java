@@ -1,21 +1,19 @@
 package com.devh.project.authserver.helper;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class BCryptHelper {
-	private final BCryptPasswordEncoder bcryptPasswordEncoder;
-	
-	public BCryptHelper() {
-		this.bcryptPasswordEncoder = new BCryptPasswordEncoder();
-	}
+	private final PasswordEncoder passwordEncoder;
 	
 	public String encode(String rawString) {
-		return this.bcryptPasswordEncoder.encode(rawString);
+		return this.passwordEncoder.encode(rawString);
 	}
 	
 	public boolean matches(String rawString, String encodedString) {
-		return this.bcryptPasswordEncoder.matches(rawString, encodedString);
+		return this.passwordEncoder.matches(rawString, encodedString);
 	}
 }
