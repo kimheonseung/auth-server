@@ -78,6 +78,15 @@ public class ApiResponseDTO<T> {
                 .build();
     }
 
+    public static <T> ApiResponseDTO<T> authError(ApiStatus.AuthError status) {
+    	return ApiResponseDTO.<T>builder()
+    			.timestamp(LocalDateTime.now())
+    			.status(status.getCode())
+    			.message(status.getStatus())
+    			.description(status.getDescription())
+    			.build();
+    }
+    
     public static <T> ApiResponseDTO<T> serverError(ApiStatus.ServerError status, String stacktrace) {
         return ApiResponseDTO.<T>builder()
                 .timestamp(LocalDateTime.now())

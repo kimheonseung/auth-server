@@ -33,6 +33,22 @@ public class ApiStatus {
             this.description = description;
         }
     }
+    
+    @Getter
+    public enum AuthError {
+    	UNAUTHORIZED("Unauthorized", 401, "Unauthoriazed."),
+    	ACCESS_DENIED("Access Denied", 403, "Access denied.");
+    	
+    	private final String status;
+    	private final int code;
+    	private final String description;
+    	
+    	AuthError(String status, int code, String description) {
+    		this.status = status;
+    		this.code = code;
+    		this.description = description;
+    	}
+    }
 
     @Getter
     public enum ServerError {

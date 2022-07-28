@@ -1,8 +1,9 @@
 package com.devh.project.authserver.configuration;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -13,12 +14,19 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
-import javax.servlet.http.HttpServletResponse;
+import com.devh.project.common.constant.ApiStatus.AuthError;
+import com.devh.project.common.dto.ApiResponseDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
+	// https://dev-coco.tistory.com/174
+	
+	private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+	
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -30,14 +38,21 @@ public class SecurityConfiguration {
         http
                 .antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers("/logout", "/refresh").hasAuthority("USER").and()
+                	.antMatchers("/logout", "/refresh").hasAuthority("USER")
+                .and()
                 .httpBasic().disable()
                 .formLogin().disable()
                 .cors().disable()
                 .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .exceptionHandling().accessDeniedHandler(accessDeniedHandler()).authenticationEntryPoint(authenticationEntryPoint()).and()
-                .addFilter(/* jwtFilter */null);
+                .exceptionHandling()
+                	.accessDeniedHandler(accessDeniedHandler())
+                	.authenticationEntryPoint(authenticationEntryPoint())
+                .and()
+                .sessionManagement()
+                	.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                	.maximumSessions(5)
+                	.maxSessionsPreventsLogin(true);
+                
         return http.build();
     }
 
@@ -51,8 +66,8 @@ public class SecurityConfiguration {
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, e) -> {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.setContentType("text/plain;charset=UTF-8");
-            response.getWriter().write("ACCESS DENIED");
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(objectMapper.writeValueAsString(ApiResponseDTO.authError(AuthError.ACCESS_DENIED)));
             response.getWriter().flush();
             response.getWriter().close();
         };
@@ -62,8 +77,8 @@ public class SecurityConfiguration {
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, e) -> {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("text/plain;charset=UTF-8");
-            response.getWriter().write("UNAUTHORIZED");
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(objectMapper.writeValueAsString(ApiResponseDTO.authError(AuthError.UNAUTHORIZED)));
             response.getWriter().flush();
             response.getWriter().close();
         };

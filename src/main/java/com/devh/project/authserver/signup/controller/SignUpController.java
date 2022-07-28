@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.devh.project.authserver.signup.exception.DuplicateEmailException;
-import com.devh.project.authserver.signup.exception.PasswordException;
-import com.devh.project.authserver.signup.exception.SignUpException;
 import com.devh.project.authserver.signup.dto.SignUpRequestDTO;
 import com.devh.project.authserver.signup.dto.SignUpResponseDTO;
 import com.devh.project.authserver.signup.service.SignUpService;
@@ -21,12 +18,10 @@ import com.devh.project.common.constant.ApiStatus;
 import com.devh.project.common.dto.ApiResponseDTO;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/signup")
-@Slf4j
 public class SignUpController {
 
     private final SignUpService signUpService;
@@ -37,7 +32,7 @@ public class SignUpController {
     @GetMapping
 	public ModelAndView getSignUp() {
     	ModelAndView mav = new ModelAndView();
-    	mav.setViewName("/member/signup.html");
+    	mav.setViewName("/signup.html");
     	mav.addObject("aesKey", key);
     	return mav;
 	}
