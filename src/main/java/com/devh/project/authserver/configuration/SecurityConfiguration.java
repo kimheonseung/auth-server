@@ -24,6 +24,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public class SecurityConfiguration {
 
 	// https://dev-coco.tistory.com/174
+    // https://www.inflearn.com/questions/34886
+    // https://mangkyu.tistory.com/77
 	
 	private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 	
