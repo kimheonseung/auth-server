@@ -1,16 +1,23 @@
 package com.devh.project.authserver.domain;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import java.io.Serializable;
+import java.util.HashSet;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.io.Serializable;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.devh.project.authserver.session.UserDetailsImpl;
+
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Builder
@@ -32,5 +39,15 @@ public class Member implements Serializable {
         this.email = email;
         this.name = name;
         this.password = password;
+    }
+    
+    public UserDetails toUserDetails() {
+    	return UserDetailsImpl.builder()
+    			.id(id)
+    			.email(email)
+    			.name(name)
+    			.password(password)
+    			.authorities(new HashSet<GrantedAuthority>())
+    			.build();
     }
 }
