@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,21 +20,25 @@ import com.devh.project.common.constant.ApiStatus.AuthError;
 import com.devh.project.common.dto.ApiResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 //@EnableWebSecurity
 public class SpringSecurityConfiguration {
-	
+
+	// https://ws-pace.tistory.com/249
+
 	private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 	
-//	@Autowired
-//	public UserDetailsService userDetailsService;
+	@Autowired
+	private AuthenticationFailureHandler authenticationFailureHandler;
 	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, e) -> {
@@ -64,6 +70,7 @@ public class SpringSecurityConfiguration {
 				.usernameParameter("email")
 				.passwordParameter("password")
 				.loginPage("/login")
+				.failureHandler(authenticationFailureHandler)
 //				.loginProcessingUrl("/login")
 				.permitAll()
 				.and()
@@ -74,12 +81,6 @@ public class SpringSecurityConfiguration {
 			.authorizeHttpRequests((authz) -> authz
 					.antMatchers("/logout", "/refresh", "/admin").authenticated()
 					.anyRequest().permitAll());
-		
-		/**
-		 * .antMatchers("/login").permitAll()
-                	.antMatchers("/logout", "/refresh").hasAuthority("USER")
-                	.antMatchers("/admin").hasAnyAuthority("ADMIN")
-		 */
 		return http.build();
 	}
 	

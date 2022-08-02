@@ -13,39 +13,23 @@
 
 const key = "[[${aesKey}]]";
 document.addEventListener("DOMContentLoaded", (evt) => {
-	
-  document.getElementById('btn_login').addEventListener('click', () => {
-    axios
-        .post('/login', JSON.stringify({
-          email: document.getElementById('email').value,
-          password: aes256Service().encrypt(document.getElementById('password').value)
-        }));
-    
-	/*
-    axios
-        .post('/login', {
-          email: document.getElementById('email').value,
-          name: document.getElementById('name').value,
-          password: aes256Service().encrypt(document.getElementById('password').value)
-        })
-        .then((res) => {
-          alert('이메일 인증을 통해 가입을 완료해주세요.');
-          window.location.reload();
-        })
-        .catch((e) => {
-          alert(e);
-        });
-	  */
-    });
+	if(window.location.search.substring(1) === 'error') {
+		alert('login failed.');
+	}
+	document.getElementById('login-form').addEventListener('submit', (e) => {
+		e.preventDefault();
+		document.getElementById('password').value = aes256Service().encrypt(document.getElementById('password').value);
+		document.getElementById('login-form').submit();
+	});
 });
 </script>
 <body>
 <div class="wrap flex_center width_100">
-	<!-- <form action="/login/process" method="post" id="login-form">  -->
+	<form action="/login" method="post" id="login-form">
 		<input type="text" name="email" id="email" placeholder="Email" />
 		<input type="password" name="password" id="password" placeholder="Password" />
 		<button id="btn_login">로그인</button>
-	<!-- </form>  -->
+	</form>
 </div>
 </body>
 </html>
