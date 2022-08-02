@@ -1,4 +1,4 @@
-package com.devh.project.authserver.session;
+package com.devh.project.authserver.security.impl;
 
 import java.util.Collection;
 

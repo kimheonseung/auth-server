@@ -10,8 +10,9 @@ import javax.persistence.Id;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.devh.project.authserver.session.UserDetailsImpl;
+import com.devh.project.authserver.security.impl.UserDetailsImpl;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -42,12 +43,16 @@ public class Member implements Serializable {
     }
     
     public UserDetails toUserDetails() {
-    	return UserDetailsImpl.builder()
-    			.id(id)
-    			.email(email)
-    			.name(name)
-    			.password(password)
-    			.authorities(new HashSet<GrantedAuthority>())
-    			.build();
+    	try {
+    		return UserDetailsImpl.builder()
+    				.id(id)
+    				.email(email)
+    				.name(name)
+    				.password(password)
+    				.authorities(new HashSet<GrantedAuthority>())
+    				.build();
+    	} catch (Exception e) {
+			throw new UsernameNotFoundException("user not found.");
+		}
     }
 }

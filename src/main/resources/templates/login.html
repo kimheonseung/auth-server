@@ -13,12 +13,13 @@
 
 const key = "[[${aesKey}]]";
 document.addEventListener("DOMContentLoaded", (evt) => {
+	
   document.getElementById('btn_login').addEventListener('click', () => {
     axios
-        .post('/login', {
+        .post('/login', JSON.stringify({
           email: document.getElementById('email').value,
           password: aes256Service().encrypt(document.getElementById('password').value)
-        });
+        }));
     
 	/*
     axios
@@ -40,11 +41,11 @@ document.addEventListener("DOMContentLoaded", (evt) => {
 </script>
 <body>
 <div class="wrap flex_center width_100">
-	<form action="/login/process" method="post" id="login-form">
+	<!-- <form action="/login/process" method="post" id="login-form">  -->
 		<input type="text" name="email" id="email" placeholder="Email" />
 		<input type="password" name="password" id="password" placeholder="Password" />
 		<button id="btn_login">로그인</button>
-	</form>
+	<!-- </form>  -->
 </div>
 </body>
 </html>

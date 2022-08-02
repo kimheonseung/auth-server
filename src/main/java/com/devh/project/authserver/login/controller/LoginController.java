@@ -2,7 +2,6 @@ package com.devh.project.authserver.login.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -17,7 +16,7 @@ public class LoginController {
 	@Value("${aes.key}")
 	private String key;
 	
-	@GetMapping("/form")
+	@GetMapping
 	public ModelAndView getLogin() {
 		ModelAndView mav = new ModelAndView();
 		mav.setViewName("login.html");
