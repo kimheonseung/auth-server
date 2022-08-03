@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -34,6 +35,9 @@ public class Member implements Serializable {
     private String email;
     private String name;
     private String password;
+
+    @Embedded
+    private Address address;
 
     public Member(Long id, String email, String name, String password) {
         this.id = id;
