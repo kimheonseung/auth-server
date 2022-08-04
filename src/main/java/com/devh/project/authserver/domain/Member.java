@@ -1,13 +1,16 @@
 package com.devh.project.authserver.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.devh.project.authserver.security.impl.UserDetailsImpl;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -24,6 +28,7 @@ import lombok.ToString;
 @Entity
 @Builder
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id", "email"})
 @ToString
@@ -38,6 +43,10 @@ public class Member implements Serializable {
 
     @Embedded
     private Address address;
+    
+    @Builder.Default
+    @OneToMany(mappedBy = "member")
+    private List<Order> orders = new ArrayList<>();
 
     public Member(Long id, String email, String name, String password) {
         this.id = id;
