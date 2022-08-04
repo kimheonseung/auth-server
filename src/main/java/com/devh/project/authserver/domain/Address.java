@@ -12,4 +12,9 @@ public class Address {
     private String city;
     private String street;
     private String zipcode;
+
+    @Override
+    public String toString() {
+        return String.format("%s시 %s로 [%s]", city, street, zipcode);
+    }
 }
